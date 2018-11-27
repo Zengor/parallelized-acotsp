@@ -58,7 +58,7 @@ fn initialize_colony<'a>(data: &'a InstanceData, parameters: &'a mut AcoParamete
     let colony = Colony {
         iteration: 0,
         data,
-        pheromones: crate::util::generate_filled_matrix(data.size, parameters.pheromone_initial),
+        pheromones: crate::util::generate_pheromone_matrix(data.size, parameters.pheromone_initial),
         nn_list,
         parameters,
     };
