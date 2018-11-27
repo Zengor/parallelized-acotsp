@@ -42,8 +42,8 @@ impl Ant {
     }
 }
 
-/// Form nearest neighbour tour given a starting city.
-pub fn nearest_neighbour_tour(data: &InstanceData, starting_city: usize) -> AntResult {
+/// Form nearest neighbour tour given a starting city and return its value
+pub fn nearest_neighbour_tour(data: &InstanceData, starting_city: usize) -> usize {
     let mut result = AntResult::new(data.size);
     result.tour.insert(starting_city);
     let mut curr = starting_city;
@@ -62,7 +62,7 @@ pub fn nearest_neighbour_tour(data: &InstanceData, starting_city: usize) -> AntR
     }
     // Include edge between last and initial node in the value
     result.value += data.distances[result.get_last()][result.get_first()];
-    result
+    result.value
 }
 
 pub fn mmas_ant(data: &InstanceData,
