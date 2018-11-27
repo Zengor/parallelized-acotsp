@@ -1,5 +1,5 @@
 [package]
-authors = ["almia"]
+authors = ["Iago"]
 edition = "2018"
 name = "parallelized-acotsp"
 version = "0.1.0"

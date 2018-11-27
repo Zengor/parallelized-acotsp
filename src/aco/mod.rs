@@ -55,10 +55,10 @@ fn initialize_colony<'a>(data: &'a InstanceData, parameters: &'a mut AcoParamete
     
     calculate_initial_values(&nn_list[0], data.size, parameters);
     
-    let mut colony = Colony {
+    let colony = Colony {
         iteration: 0,
         data,
-        pheromones: crate::util::generate_empty_matrix(data.size),
+        pheromones: crate::util::generate_filled_matrix(data.size, parameters.pheromone_initial),
         nn_list,
         parameters,
     };
@@ -70,12 +70,12 @@ fn calculate_initial_values(nn_tour: &AntResult,
                             num_nodes: usize,
                             parameters: &mut AcoParameters) {
     match &parameters.algorithm {
-        MMAS => {
+        Algorithm::MMAS => {
             parameters.trail_max = 1.0 / (parameters.evaporation_rate * nn_tour.value);
             parameters.trail_min = parameters.trail_max / (2.0 * num_nodes as f64);
             parameters.pheromone_initial = parameters.trail_max;
         },
-        ACS => {
+        Algorithm::ACS => {
             parameters.pheromone_initial = 1.0 / (num_nodes as f64 * nn_tour.value);
         }
     }
