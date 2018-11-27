@@ -9,7 +9,7 @@ pub fn generate_pheromone_matrix(size: usize, value: f64) -> PheromoneMatrix {
     matrix
 }
 
-fn generate_filled_matrix<T: Copy>(size: usize, element: T) -> Vec<Vec<T>> {
+pub fn generate_filled_matrix<T: Copy>(size: usize, element: T) -> Vec<Vec<T>> {
     let mut out = Vec::with_capacity(size);
     for _ in 0..size {
         out.push(vec![element; size]);
@@ -17,6 +17,8 @@ fn generate_filled_matrix<T: Copy>(size: usize, element: T) -> Vec<Vec<T>> {
     out    
 }
 
-mod distance_funcs {
-
+pub mod distance_funcs {
+    pub fn euc_2d(i: (usize, usize), j: (usize, usize)) -> usize {
+        (((i.0 - j.0).pow(2) * (i.1 - j.1).pow(2)) as f64).sqrt().round() as usize
+    }
 }
