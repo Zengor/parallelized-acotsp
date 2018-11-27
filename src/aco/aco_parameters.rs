@@ -16,9 +16,9 @@ pub struct AcoParameters {
     pub pheromone_initial: f64,
     /// Probability an ant will make best possible move during tour construction in ACS
     pub q_0: f64,
-    /// Maximum pheromone value for MMAS
+    /// Maximum pheromone value for MMAS. This is calculated by the colony.
     pub trail_max: f64,
-    /// Minimum pheromone value for MMAS
+    /// Minimum pheromone value for MMAS. This is calculated by the colony.
     pub trail_min: f64,
     pub algorithm: Algorithm,
     /// Maximum number of iterations a colony may run

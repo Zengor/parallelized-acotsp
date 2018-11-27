@@ -27,6 +27,8 @@ pub struct Colony<'a> {
     parameters: &'a AcoParameters,
 }
 
+
+/// Returns true if run should end
 fn check_termination() -> bool {
     unimplemented!()
 }
@@ -51,7 +53,7 @@ fn initialize_colony<'a>(data: &'a InstanceData, parameters: &'a mut AcoParamete
         nn_list.push(ant::nearest_neighbour_tour(data, i));
     }
     
-    parameters.pheromone_initial = nn_list[0].value;
+    calculate_initial_values(&nn_list[0], data.size, parameters);
     
     let mut colony = Colony {
         iteration: 0,
@@ -62,6 +64,23 @@ fn initialize_colony<'a>(data: &'a InstanceData, parameters: &'a mut AcoParamete
     };
     colony
 }
+
+/// Calculates initial pheromone trails, as well as trail_max and trail_min for MMAS
+fn calculate_initial_values(nn_tour: &AntResult,
+                            num_nodes: usize,
+                            parameters: &mut AcoParameters) {
+    match &parameters.algorithm {
+        MMAS => {
+            parameters.trail_max = 1.0 / (parameters.evaporation_rate * nn_tour.value);
+            parameters.trail_min = parameters.trail_max / (2.0 * num_nodes as f64);
+            parameters.pheromone_initial = parameters.trail_max;
+        },
+        ACS => {
+            parameters.pheromone_initial = 1.0 / (num_nodes as f64 * nn_tour.value);
+        }
+    }
+}
+
 
 fn construct_solutions(colony: &mut Colony) -> Vec<AntResult> {
     match colony.parameters.algorithm {

@@ -17,6 +17,14 @@ impl AntResult {
             value: 0.0f64,
         }
     }
+
+    fn get_first(&self) -> usize {
+        *self.tour.get_index(0).unwrap()
+    }
+
+    fn get_last(&self) -> usize {
+        *self.tour.get_index(self.tour.len()-1).unwrap()
+    }
 }
 
 #[derive(Default)]
@@ -41,7 +49,7 @@ pub fn nearest_neighbour_tour(data: &InstanceData, starting_city: usize) -> AntR
     let mut curr = starting_city;
     
     while result.tour.len() != data.size {
-        // find smallest (index,value) not in in O(n)
+        // TODO find smallest (index,value) not in in O(n)
         for (i,v) in data.distances[curr].iter().enumerate()
             .sorted_by(|a,b| PartialOrd::partial_cmp(a.1,b.1).unwrap()) {
                 if result.tour.contains(&i) {
@@ -50,9 +58,10 @@ pub fn nearest_neighbour_tour(data: &InstanceData, starting_city: usize) -> AntR
                 result.tour.insert(i);
                 result.value += v;
                 curr = i;
-        }
-        
+        }        
     }
+    // Include edge between last and initial node in the value
+    result.value += data.distances[result.get_last()][result.get_first()];
     result
 }
 
