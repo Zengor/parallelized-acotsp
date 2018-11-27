@@ -17,7 +17,7 @@ impl TimestampedResult {
         }
     }
 
-    fn value(&self) -> f64 {
+    fn value(&self) -> usize {
         self.result.value
     }
 }
@@ -35,7 +35,7 @@ impl ResultLog {
         }
     }
 
-    pub fn best_value(&self) -> f64 {
+    pub fn best_value(&self) -> usize {
         self.log[self.best_so_far].value()
     }
 

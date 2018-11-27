@@ -1,5 +1,5 @@
 use indexmap::IndexSet;
-use crate::util::Matrix;
+use crate::util::{PheromoneMatrix};
 use crate::instance_data::InstanceData;
 use super::aco_parameters::AcoParameters;
 use itertools::Itertools;
@@ -7,14 +7,14 @@ use itertools::Itertools;
 #[derive(Default, Clone)]
 pub struct AntResult {
     pub tour: IndexSet<usize>,
-    pub value: f64,
+    pub value: usize,
 }
 
 impl AntResult {
     fn new(data_size: usize) -> Self {
         AntResult {
             tour: IndexSet::with_capacity(data_size),
-            value: 0.0f64,
+            value: 0,
         }
     }
 
@@ -66,7 +66,7 @@ pub fn nearest_neighbour_tour(data: &InstanceData, starting_city: usize) -> AntR
 }
 
 pub fn mmas_ant(data: &InstanceData,
-               pheromones: &Matrix,
+               pheromones: &PheromoneMatrix,
                parameters: &AcoParameters) -> AntResult {
     unimplemented!()
 }

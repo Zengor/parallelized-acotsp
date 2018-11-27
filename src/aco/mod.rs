@@ -6,7 +6,7 @@ mod result_log;
 
 pub use self::aco_parameters::AcoParameters;
 
-use crate::util::Matrix;
+use crate::util::{PheromoneMatrix};
 use crate::instance_data::InstanceData;
 pub use self::ant::AntResult;
 pub use self::result_log::{TimestampedResult, ResultLog};
@@ -22,7 +22,7 @@ impl Default for Algorithm {
 pub struct Colony<'a> {
     iteration: usize,
     data: &'a InstanceData,
-    pheromones: Matrix,
+    pheromones: PheromoneMatrix,
     nn_list: Vec<AntResult>,
     parameters: &'a AcoParameters,
 }
@@ -71,12 +71,12 @@ fn calculate_initial_values(nn_tour: &AntResult,
                             parameters: &mut AcoParameters) {
     match &parameters.algorithm {
         Algorithm::MMAS => {
-            parameters.trail_max = 1.0 / (parameters.evaporation_rate * nn_tour.value);
+            parameters.trail_max = 1.0 / (parameters.evaporation_rate * nn_tour.value as f64);
             parameters.trail_min = parameters.trail_max / (2.0 * num_nodes as f64);
             parameters.pheromone_initial = parameters.trail_max;
         },
         Algorithm::ACS => {
-            parameters.pheromone_initial = 1.0 / (num_nodes as f64 * nn_tour.value);
+            parameters.pheromone_initial = 1.0 / (num_nodes * nn_tour.value) as f64;
         }
     }
 }
