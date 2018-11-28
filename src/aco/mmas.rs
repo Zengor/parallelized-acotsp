@@ -11,25 +11,35 @@ pub struct MMASColony<'a> {
     data: &'a InstanceData,
     pheromones: PheromoneMatrix,
     nn_list: Vec<Vec<usize>>,
+    /// Maximum pheromone value for MMAS. This is calculated by the colony.
+    pub trail_max: f64,
+    /// Minimum pheromone value for MMAS. This is calculated by the colony.
+    pub trail_min: f64,
     parameters: &'a AcoParameters,
 }
 
 impl<'a> Colony<'a> for MMASColony<'a> {
-    fn initialize_colony(data: &'a InstanceData, parameters: &'a mut AcoParameters) -> MMASColony<'a> {
+    fn initialize_colony(data: &'a InstanceData, parameters: &'a AcoParameters) -> MMASColony<'a> {
         let nn_tour_length = super::ant::nearest_neighbour_tour(data, 0);
         //let mut nn_list = Vec::with_capacity(data.size);
         // TODO calculate nn_list
     
-        calculate_initial_values(nn_tour_length, data.size, parameters);
+        let (trail_min, trail_max) = MMASColony::calculate_initial_values(nn_tour_length, 
+                                                                          data.size, 
+                                                                          parameters);
     
         Self {
             iteration: 0,
             data,
-            pheromones: crate::util::generate_pheromone_matrix(data.size, parameters.pheromone_initial),
+            pheromones: crate::util::generate_pheromone_matrix(data.size, trail_max),
             nn_list: super::generate_nn_list(data),
+            trail_max,
+            trail_min,
             parameters,
         }
     }
+
+
 
     fn check_termination() -> bool {
         unimplemented!()
@@ -64,9 +74,18 @@ impl<'a> Colony<'a> for MMASColony<'a> {
 }
 
 impl MMASColony<'_> {
+    /// Calculates initial pheromone trails, as well as trail_max and trail_min for MMAS
+    fn calculate_initial_values(nn_tour_length: usize,
+                                num_nodes: usize,
+                                parameters: &AcoParameters) -> (f64, f64) {
+        let trail_max = 1.0 / (parameters.evaporation_rate * nn_tour_length as f64);
+        let trail_min = trail_max / (2.0 * num_nodes as f64);
+        (trail_min, trail_max)
+    }
+
     fn evaporate(&mut self) {
         let evap_rate = self.parameters.evaporation_rate;
-        let trail_min = self.parameters.trail_min;
+        let trail_min = self.trail_min;
         for i in 0..self.data.size {
             for j in 0..i {
                 let mut new_pheromone = (1.0 - evap_rate) * self.pheromones[i][j];
@@ -81,14 +100,7 @@ impl MMASColony<'_> {
 }
 
 
-/// Calculates initial pheromone trails, as well as trail_max and trail_min for MMAS
-fn calculate_initial_values(nn_tour_length: usize,
-                            num_nodes: usize,
-                            parameters: &mut AcoParameters) {
-        parameters.trail_max = 1.0 / (parameters.evaporation_rate * nn_tour_length as f64);
-        parameters.trail_min = parameters.trail_max / (2.0 * num_nodes as f64);
-        parameters.pheromone_initial = parameters.trail_max;
-}
+
 
 
 

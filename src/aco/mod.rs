@@ -28,13 +28,13 @@ fn check_termination() -> bool {
     unimplemented!()
 }
 
-fn run_aco(data: &InstanceData, parameters: &mut AcoParameters) {
+fn run_aco(data: &InstanceData, parameters: &AcoParameters) {
     let algorithm = &parameters.algorithm;
-    let max_iterations = parameters.max_iterations;
+    
     match *algorithm {
         Algorithm::MMAS => {
             let colony = mmas::MMASColony::initialize_colony(data, parameters);
-            run_colony(colony, max_iterations)
+            run_colony(colony, parameters.max_iterations)
         },
         Algorithm::ACS => {
 
@@ -65,22 +65,6 @@ fn generate_nn_list(data: &InstanceData) -> Vec<Vec<usize>>{
         nn_list.push(sorted);
     }
     nn_list
-}
-
-/// Calculates initial pheromone trails, as well as trail_max and trail_min for MMAS
-fn calculate_initial_values(nn_tour_length: usize,
-                            num_nodes: usize,
-                            parameters: &mut AcoParameters) {
-    match &parameters.algorithm {
-        Algorithm::MMAS => {
-            parameters.trail_max = 1.0 / (parameters.evaporation_rate * nn_tour_length as f64);
-            parameters.trail_min = parameters.trail_max / (2.0 * num_nodes as f64);
-            parameters.pheromone_initial = parameters.trail_max;
-        },
-        Algorithm::ACS => {
-            parameters.pheromone_initial = 1.0 / (num_nodes * nn_tour_length) as f64;
-        }
-    }
 }
 
 
