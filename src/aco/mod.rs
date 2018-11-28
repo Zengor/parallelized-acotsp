@@ -4,12 +4,14 @@ mod mmas;
 mod acs;
 mod result_log;
 
-pub use self::aco_parameters::AcoParameters;
-
+use itertools::Itertools;
 use crate::util::{PheromoneMatrix};
 use crate::instance_data::InstanceData;
+
+pub use self::aco_parameters::AcoParameters;
 pub use self::ant::AntResult;
 pub use self::result_log::{TimestampedResult, ResultLog};
+
 pub enum Algorithm {
     ACS,
     MMAS,
@@ -23,7 +25,7 @@ pub struct Colony<'a> {
     iteration: usize,
     data: &'a InstanceData,
     pheromones: PheromoneMatrix,
-    //nn_list: Vec<AntResult>,
+    nn_list: Vec<Vec<usize>>,
     parameters: &'a AcoParameters,
 }
 
@@ -46,6 +48,7 @@ fn run(data: &InstanceData, parameters: &mut AcoParameters) {
     }
 }
 
+
 fn initialize_colony<'a>(data: &'a InstanceData, parameters: &'a mut AcoParameters) -> Colony<'a> {
     let nn_tour_length = ant::nearest_neighbour_tour(data, 0);
     //let mut nn_list = Vec::with_capacity(data.size);
@@ -57,10 +60,22 @@ fn initialize_colony<'a>(data: &'a InstanceData, parameters: &'a mut AcoParamete
         iteration: 0,
         data,
         pheromones: crate::util::generate_pheromone_matrix(data.size, parameters.pheromone_initial),
-        //nn_list,
+        nn_list: generate_nn_list(data),
         parameters,
     };
     colony
+}
+
+fn generate_nn_list(data: &InstanceData) -> Vec<Vec<usize>>{
+    let mut nn_list = Vec::with_capacity(data.size);
+    for i in 0..data.size {
+        let mut sorted = data.distances[i].iter()
+                                        .map(|x| x.to_owned())
+                                        .sorted();
+        sorted.pop();
+        nn_list.push(sorted);
+    }
+    nn_list
 }
 
 /// Calculates initial pheromone trails, as well as trail_max and trail_min for MMAS
