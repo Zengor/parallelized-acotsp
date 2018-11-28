@@ -23,14 +23,9 @@ impl Default for Algorithm {
     fn default() -> Algorithm { Algorithm::ACS }
 }
 
-/// Returns true if run should end
-fn check_termination() -> bool {
-    unimplemented!()
-}
-
 fn run_aco(data: &InstanceData, parameters: &AcoParameters) {
     let algorithm = &parameters.algorithm;
-    
+
     match *algorithm {
         Algorithm::MMAS => {
             let colony = mmas::MMASColony::initialize_colony(data, parameters);
@@ -47,7 +42,7 @@ fn run_colony<'a>(mut colony: impl Colony<'a>, max_iterations: usize) {
     //initialize pheromones
     //initialize nn_lists
     let mut results_log = ResultLog::new(max_iterations);
-    while !check_termination() {
+    while !colony.check_termination() {
         colony.new_iteration();
         let results = colony.construct_solutions();
         update_stats(&results, &mut results_log, colony.iteration());

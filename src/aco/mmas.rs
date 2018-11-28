@@ -39,9 +39,7 @@ impl<'a> Colony<'a> for MMASColony<'a> {
         }
     }
 
-
-
-    fn check_termination() -> bool {
+    fn check_termination(&self) -> bool {
         unimplemented!()
     }
 
