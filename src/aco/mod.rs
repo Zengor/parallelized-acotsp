@@ -15,15 +15,15 @@ pub use self::result_log::{TimestampedResult, ResultLog};
 use self::colony::Colony;
 
 pub enum Algorithm {
-    ACS,
     MMAS,
+    ACS,
 }
 
 impl Default for Algorithm {
-    fn default() -> Algorithm { Algorithm::ACS }
+    fn default() -> Algorithm { Algorithm::MMAS }
 }
 
-fn run_aco(data: &InstanceData, parameters: &AcoParameters) {
+fn run_aco(data: &InstanceData, parameters: &AcoParameters) -> ResultLog {
     let algorithm = &parameters.algorithm;
 
     match *algorithm {
@@ -32,12 +32,12 @@ fn run_aco(data: &InstanceData, parameters: &AcoParameters) {
             run_colony(colony, parameters.max_iterations)
         },
         Algorithm::ACS => {
-
+            unimplemented!()
         }
     }
 }
 
-fn run_colony<'a>(mut colony: impl Colony<'a>, max_iterations: usize) {
+fn run_colony<'a>(mut colony: impl Colony<'a>, max_iterations: usize) -> ResultLog{
     //initialize timer and logger
     //initialize pheromones
     //initialize nn_lists
@@ -48,6 +48,7 @@ fn run_colony<'a>(mut colony: impl Colony<'a>, max_iterations: usize) {
         update_stats(&results, &mut results_log, colony.iteration());
         colony.update_pheromones(&results);
     }
+    results_log
 }
 
 fn generate_nn_list(data: &InstanceData) -> Vec<Vec<usize>>{
