@@ -1,9 +1,9 @@
 use indexmap::IndexSet;
-use crate::util::{PheromoneMatrix};
+use itertools::Itertools;
+use rand::{thread_rng, Rng};
+use crate::util::{PheromoneMatrix, IntegerMatrix};
 use crate::instance_data::InstanceData;
 use super::aco_parameters::AcoParameters;
-use itertools::Itertools;
-
 #[derive(Default, Clone)]
 pub struct AntResult {
     pub tour: IndexSet<usize>,
@@ -70,9 +70,43 @@ pub fn nearest_neighbour_tour(data: &InstanceData, starting_city: usize) -> usiz
     result.value
 }
 
-pub fn mmas_ant(data: &InstanceData,
-               pheromones: &PheromoneMatrix,
-               parameters: &AcoParameters) -> AntResult {
-    unimplemented!()
+fn choose_best_next(curr_city: usize,
+                    visited: IndexSet<usize>,
+                    combined_info: &PheromoneMatrix) -> usize {
+    let (next_city,_) = combined_info[curr_city]
+        .iter()
+        .enumerate()
+        .filter(|(city,_)| !visited.contains(city))
+        .max_by(|(_,a),(_,b)| a.partial_cmp(b).unwrap()).unwrap();
+    next_city
 }
 
+pub fn mmas_ant(data: &InstanceData,
+                combined_info: &PheromoneMatrix,
+                parameters: &AcoParameters) -> AntResult {
+    let mut rng = thread_rng();
+    let mut curr_city: usize = rng.gen_range(0, data.size);
+    let mut result = AntResult::new(data.size);
+    result.tour.insert(curr_city);
+    for i in 0..data.size-1 {
+        //TODO use nn_list to aid performance
+        let next_city = unimplemented!();
+        result.insert(next_city, data.distances[curr_city][next_city]);
+        curr_city = next_city;
+    }
+    // Include edge between last and initial node in the value
+    result.value += data.distances[result.get_last()][result.get_first()];
+    result
+}
+
+
+pub fn total_value(distances: &IntegerMatrix, pheromones: &PheromoneMatrix,
+               parameters: &AcoParameters, i: usize, j: usize) -> f64 {
+    pheromones[i][j].powf(parameters.alpha) * heuristic(distances, i, j).powf(parameters.beta)
+}
+
+    
+
+fn heuristic(distances: &IntegerMatrix, i: usize, j: usize) -> f64 {
+    1.0 / ((distances[i][j] as f64) + 0.1)
+}
