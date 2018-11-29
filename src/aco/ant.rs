@@ -53,17 +53,17 @@ pub fn nearest_neighbour_tour(data: &InstanceData, starting_city: usize) -> usiz
     result.tour.insert(starting_city);
     let mut curr = starting_city;
     let mut next = starting_city;
-    let mut next_value = std::usize::INFINITY;
+    let mut next_value = std::usize::MAX;
     while result.tour.len() != data.size {
         for (i,v) in data.distances[curr].iter().enumerate() {
-            if !result.tour.contains(&i) && v < next_value {
+            if !result.tour.contains(&i) && v < &next_value {
                 next = i;
-                next_value = v;
+                next_value = *v;
             }
         }
-        result.insert(next, *next_value);
+        result.insert(next, next_value);
         curr = next;
-        next_value = std::usize::INFINITY;
+        next_value = std::usize::MAX;
     }
     // Include edge between last and initial node in the value
     result.value += data.distances[result.get_last()][result.get_first()];
