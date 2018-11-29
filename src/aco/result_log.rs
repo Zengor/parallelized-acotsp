@@ -17,8 +17,8 @@ impl TimestampedResult {
         }
     }
 
-    fn value(&self) -> usize {
-        self.result.value
+    fn length(&self) -> usize {
+        self.result.length
     }
 }
 
@@ -35,12 +35,12 @@ impl ResultLog {
         }
     }
 
-    pub fn best_value(&self) -> usize {
-        self.log[self.best_so_far].value()
+    pub fn best_length(&self) -> usize {
+        self.log[self.best_so_far].length()
     }
 
     pub fn push(&mut self, new: AntResult, iteration: usize) {
-        let is_new_best = new.value < self.best_value();
+        let is_new_best = new.length < self.best_length();
         let timestamped = TimestampedResult::new(new, iteration, is_new_best);
         self.log.push(timestamped);
         if is_new_best {

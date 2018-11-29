@@ -7,20 +7,20 @@ use super::aco_parameters::AcoParameters;
 #[derive(Default, Clone)]
 pub struct AntResult {
     pub tour: IndexSet<usize>,
-    pub value: usize,
+    pub length: usize,
 }
 
 impl AntResult {
     fn new(data_size: usize) -> Self {
         AntResult {
             tour: IndexSet::with_capacity(data_size),
-            value: 0,
+            length: 0,
         }
     }
 
-    fn insert(&mut self, new_node: usize, connection_value: usize) {
+    fn insert(&mut self, new_node: usize, connection_length: usize) {
         self.tour.insert(new_node);
-        self.value += connection_value;
+        self.length += connection_length;
     }
 
     fn get_first(&self) -> usize {
@@ -47,27 +47,27 @@ impl Ant {
     }
 }
 
-/// Form nearest neighbour tour given a starting city and return its value
+/// Form nearest neighbour tour given a starting city and return its length
 pub fn nearest_neighbour_tour(data: &InstanceData, starting_city: usize) -> usize {
     let mut result = AntResult::new(data.size);
     result.tour.insert(starting_city);
     let mut curr = starting_city;
     let mut next = starting_city;
-    let mut next_value = std::usize::MAX;
+    let mut next_length = std::usize::MAX;
     while result.tour.len() != data.size {
         for (i,v) in data.distances[curr].iter().enumerate() {
-            if !result.tour.contains(&i) && v < &next_value {
+            if !result.tour.contains(&i) && v < &next_length {
                 next = i;
-                next_value = *v;
+                next_length = *v;
             }
         }
-        result.insert(next, next_value);
+        result.insert(next, next_length);
         curr = next;
-        next_value = std::usize::MAX;
+        next_length = std::usize::MAX;
     }
-    // Include edge between last and initial node in the value
-    result.value += data.distances[result.get_last()][result.get_first()];
-    result.value
+    // Include edge between last and initial node in the length
+    result.length += data.distances[result.get_last()][result.get_first()];
+    result.length
 }
 
 fn choose_best_next(curr_city: usize,
@@ -94,8 +94,8 @@ pub fn mmas_ant(data: &InstanceData,
         result.insert(next_city, data.distances[curr_city][next_city]);
         curr_city = next_city;
     }
-    // Include edge between last and initial node in the value
-    result.value += data.distances[result.get_last()][result.get_first()];
+    // Include edge between last and initial node in the length
+    result.length += data.distances[result.get_last()][result.get_first()];
     result
 }
 
