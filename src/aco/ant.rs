@@ -47,18 +47,18 @@ pub fn nearest_neighbour_tour(data: &InstanceData, starting_city: usize) -> usiz
     let mut result = AntResult::new(data.size);
     result.tour.insert(starting_city);
     let mut curr = starting_city;
-    
+    let mut next = starting_city;
+    let mut next_value = std::f64::INFINITY;
     while result.tour.len() != data.size {
-        // TODO find smallest (index,value) not in in O(n)
-        for (i,v) in data.distances[curr].iter().enumerate()
-            .sorted_by(|a,b| PartialOrd::partial_cmp(a.1,b.1).unwrap()) {
-                if result.tour.contains(&i) {
-                    continue
-                }               
-                result.tour.insert(i);
-                result.value += v;
-                curr = i;
-        }        
+        for (i,v) in data.distances[curr].iter().enumerate() {
+            if !result.tour.contains(&i) && v < next_value {
+                next = i;
+                next_value = v;
+            }
+        }
+        result.value += next_value;
+        curr = next;
+        next_value = std::f64::INFINITY;
     }
     // Include edge between last and initial node in the value
     result.value += data.distances[result.get_last()][result.get_first()];
