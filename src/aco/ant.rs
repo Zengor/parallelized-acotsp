@@ -18,6 +18,11 @@ impl AntResult {
         }
     }
 
+    fn insert(&mut self, new_node: usize, connection_value: usize) {
+        self.tour.insert(new_node);
+        self.value += connection_value;
+    }
+
     fn get_first(&self) -> usize {
         *self.tour.get_index(0).unwrap()
     }
@@ -48,7 +53,7 @@ pub fn nearest_neighbour_tour(data: &InstanceData, starting_city: usize) -> usiz
     result.tour.insert(starting_city);
     let mut curr = starting_city;
     let mut next = starting_city;
-    let mut next_value = std::f64::INFINITY;
+    let mut next_value = std::usize::INFINITY;
     while result.tour.len() != data.size {
         for (i,v) in data.distances[curr].iter().enumerate() {
             if !result.tour.contains(&i) && v < next_value {
@@ -56,9 +61,9 @@ pub fn nearest_neighbour_tour(data: &InstanceData, starting_city: usize) -> usiz
                 next_value = v;
             }
         }
-        result.value += next_value;
+        result.insert(next, *next_value);
         curr = next;
-        next_value = std::f64::INFINITY;
+        next_value = std::usize::INFINITY;
     }
     // Include edge between last and initial node in the value
     result.value += data.distances[result.get_last()][result.get_first()];
