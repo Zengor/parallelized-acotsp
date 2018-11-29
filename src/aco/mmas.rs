@@ -2,7 +2,7 @@ use itertools::Itertools;
 
 use super::colony::Colony;
 use super::AntResult;
-use super::ant::mmas_ant;
+use super::ant::{mmas_ant, total_value};
 use super::AcoParameters;
 use crate::instance_data::InstanceData;
 use crate::util::{PheromoneMatrix};
@@ -10,7 +10,9 @@ pub struct MMASColony<'a> {
     iteration: usize,
     data: &'a InstanceData,
     pheromones: PheromoneMatrix,
-    nn_list: Vec<Vec<usize>>,
+    /// Combined pheromone + heuristic information
+    combined_info: PheromoneMatrix,
+    nn_list: Vec<Vec<usize>>,    
     /// Maximum pheromone value for MMAS. This is calculated by the colony.
     pub trail_max: f64,
     /// Minimum pheromone value for MMAS. This is calculated by the colony.
@@ -27,16 +29,19 @@ impl<'a> Colony<'a> for MMASColony<'a> {
         let (trail_min, trail_max) = MMASColony::calculate_initial_values(nn_tour_length, 
                                                                           data.size, 
                                                                           parameters);
-    
-        Self {
+        
+        let mut out = Self {
             iteration: 0,
             data,
             pheromones: crate::util::generate_pheromone_matrix(data.size, trail_max),
+            combined_info: crate::util::generate_filled_matrix(data.size, 0.0),
             nn_list: super::generate_nn_list(data),
             trail_max,
             trail_min,
             parameters,
-        }
+        };
+        out.compute_combined_info();
+        out
     }
 
     fn check_termination(&self) -> bool {
@@ -79,6 +84,16 @@ impl MMASColony<'_> {
         let trail_max = 1.0 / (parameters.evaporation_rate * nn_tour_length as f64);
         let trail_min = trail_max / (2.0 * num_nodes as f64);
         (trail_min, trail_max)
+    }
+
+    fn compute_combined_info(&mut self) {
+        for i in 0..self.data.size {
+            for j in 0..i {
+                self.combined_info[i][j] = total_value(&self.data.distances, &self.pheromones,
+                                                       self.parameters, i, j);
+                self.combined_info[j][i] = self.combined_info[i][j];
+            }
+        }
     }
 
     fn evaporate(&mut self) {
