@@ -1,11 +1,11 @@
 use itertools::Itertools;
 
 use super::colony::Colony;
-use super::AntResult;
-use super::ant::{mmas_ant, total_value};
-use super::AcoParameters;
+use super::{AntResult, AcoParameters, total_value};
+use super::ant::mmas_ant;
 use crate::instance_data::InstanceData;
 use crate::util::{PheromoneMatrix};
+
 pub struct MMASColony<'a> {
     iteration: usize,
     data: &'a InstanceData,

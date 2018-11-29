@@ -1,15 +1,16 @@
-use crate::instance_data::{FileData, InstanceData, Metadata, DataDescriptionType};
+use crate::instance_data::{FileData, InstanceData, Metadata};
 use std::io::{BufRead, BufReader};
 use std::fs::File;
 
 pub fn read_instance_file(f_name: &str) -> FileData {
+    use crate::instance_data::DataDescriptionType::*;
+    
     let f = File::open(f_name).expect("Failed opening file");
     let mut lines = BufReader::new(&f).lines();
     let mut metadata = Metadata::default();
     let mut size: usize = 0;
-
-    use crate::instance_data::DataDescriptionType::*;
-    let mut data_layout: DataDescriptionType = NODE_COORD_SECTION;
+    let mut data_layout = NODE_COORD_SECTION;
+    
     loop {
         let line = lines.next().unwrap().unwrap();
         let split: Vec<_> = line.split(": ").collect();
@@ -35,9 +36,12 @@ pub fn read_instance_file(f_name: &str) -> FileData {
     }
 }
 
-fn read_node_coord_section(lines: std::io::Lines<BufReader<&File>>, metadata: &Metadata, size: usize) -> InstanceData {
-    use crate::instance_data::EdgeWeightType::*;
+fn read_node_coord_section(lines: std::io::Lines<BufReader<&File>>,
+                           metadata: &Metadata,
+                           size: usize) -> InstanceData {
     use crate::util::distance_funcs;
+    use crate::instance_data::EdgeWeightType::*;
+    
     let mut nodes: Vec<(usize, usize)> = Vec::with_capacity(size);
     for line in lines {
         let line = line.unwrap();
