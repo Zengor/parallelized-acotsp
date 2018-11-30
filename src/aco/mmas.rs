@@ -53,7 +53,7 @@ impl<'a> Colony<'a> for MMASColony<'a> {
     fn construct_solutions(&mut self) -> Vec<AntResult> {
         let n_ants = self.parameters.num_ants;
         (0..n_ants).into_iter()
-            .map(|_| mmas_ant(self.data, &self.pheromones, self.parameters))
+            .map(|_| mmas_ant(self.data, &self.combined_info, self.parameters))
             .collect()
     }
     
