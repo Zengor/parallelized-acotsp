@@ -63,10 +63,12 @@ impl<'a> Colony<'a> for MMASColony<'a> {
             .collect()
     }
     
-    
     fn update_pheromones(&mut self, best_this_iter: &AntResult, best_so_far: &AntResult) {
-        evaporate(&mut self.pheromones, self.parameters.evaporation_rate, self.trail_min);
-        let ant_to_use = best_this_iter;
+        evaporate(&mut self.pheromones, self.parameters.evaporation_rate, self.trail_min);        
+        let ant_to_use = match self.iteration % 25 {
+            0 => best_so_far,
+            _ => best_this_iter,
+        }
         ant::global_update_pheromones(&mut self.pheromones, ant_to_use);
     }
 }
