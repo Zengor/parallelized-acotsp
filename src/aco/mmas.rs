@@ -1,10 +1,10 @@
 use itertools::Itertools;
 
-use super::colony::Colony;
-use super::{AntResult, AcoParameters, total_value};
-use super::ant::mmas_ant;
+use super::colony::{Colony, compute_combined_info};
+use super::{AntResult, AcoParameters};
+use super::ant::{self, mmas_ant};
 use crate::instance_data::InstanceData;
-use crate::util::{PheromoneMatrix};
+use crate::util::{self, PheromoneMatrix};
 
 pub struct MMASColony<'a> {
     iteration: usize,
@@ -22,26 +22,26 @@ pub struct MMASColony<'a> {
 
 impl<'a> Colony<'a> for MMASColony<'a> {
     fn initialize_colony(data: &'a InstanceData, parameters: &'a AcoParameters) -> MMASColony<'a> {
-        let nn_tour_length = super::ant::nearest_neighbour_tour(data, 0);
+        let nn_tour_length = ant::nearest_neighbour_tour(data, 0);
         //let mut nn_list = Vec::with_capacity(data.size);
         // TODO calculate nn_list
     
-        let (trail_min, trail_max) = MMASColony::calculate_initial_values(nn_tour_length, 
-                                                                          data.size, 
-                                                                          parameters);
+        let (trail_min, trail_max) = calculate_initial_values(nn_tour_length,
+                                                              data.size, 
+                                                              parameters);
+        let pheromones = util::generate_pheromone_matrix(data.size, trail_max);
+        let combined_info = compute_combined_info(&data.distances, &pheromones, parameters);
         
-        let mut out = Self {
+        Self {
             iteration: 0,
             data,
-            pheromones: crate::util::generate_pheromone_matrix(data.size, trail_max),
-            combined_info: crate::util::generate_filled_matrix(data.size, 0.0),
+            pheromones,
+            combined_info,
             nn_list: super::generate_nn_list(data),
             trail_max,
             trail_min,
             parameters,
-        };
-        out.compute_combined_info();
-        out
+        }
     }
 
     fn check_termination(&self) -> bool {
@@ -65,55 +65,35 @@ impl<'a> Colony<'a> for MMASColony<'a> {
     
     
     fn update_pheromones(&mut self, best_this_iter: &AntResult, best_so_far: &AntResult) {
-        self.evaporate();
-        let best_this_iter = super::find_best(results);
-        let d_tau = 1.0 / (best_this_iter.length as f64);
-        for (&i,&j) in best_this_iter.tour.iter().tuple_windows() {
-            self.pheromones[i][j] += d_tau;
-            self.pheromones[j][i] += self.pheromones[i][j];
-        }   
+        evaporate(&mut self.pheromones, self.parameters.evaporation_rate, self.trail_min);
+        let ant_to_use = best_this_iter;
+        ant::global_update_pheromones(&mut self.pheromones, ant_to_use);
     }
 }
 
-impl MMASColony<'_> {
-    /// Calculates initial pheromone trails, as well as trail_max and trail_min for MMAS
-    fn calculate_initial_values(nn_tour_length: usize,
-                                num_nodes: usize,
-                                parameters: &AcoParameters) -> (f64, f64) {
-        let trail_max = 1.0 / (parameters.evaporation_rate * nn_tour_length as f64);
-        let trail_min = trail_max / (2.0 * num_nodes as f64);
-        (trail_min, trail_max)
-    }
+/// Calculates initial pheromone trails, as well as trail_max and trail_min for MMAS
+fn calculate_initial_values(nn_tour_length: usize,
+                            num_nodes: usize,
+                            parameters: &AcoParameters) -> (f64, f64) {
+    let trail_max = 1.0 / (parameters.evaporation_rate * nn_tour_length as f64);
+    let trail_min = trail_max / (2.0 * num_nodes as f64);
+    (trail_min, trail_max)
+}
 
-    fn compute_combined_info(&mut self) {
-        for i in 0..self.data.size {
-            for j in 0..i {
-                self.combined_info[i][j] = total_value(&self.data.distances, &self.pheromones,
-                                                       self.parameters, i, j);
-                self.combined_info[j][i] = self.combined_info[i][j];
+fn evaporate(pheromones: &mut PheromoneMatrix,
+             evap_rate: f64,
+             trail_min: f64) {
+    for i in 0..pheromones.len() {
+        for j in 0..i {
+            let mut new_pheromone = (1.0 - evap_rate) * pheromones[i][j];
+            if new_pheromone < trail_min {
+                new_pheromone = trail_min;
             }
-        }
-    }
-
-    fn evaporate(&mut self) {
-        let evap_rate = self.parameters.evaporation_rate;
-        let trail_min = self.trail_min;
-        for i in 0..self.data.size {
-            for j in 0..i {
-                let mut new_pheromone = (1.0 - evap_rate) * self.pheromones[i][j];
-                if new_pheromone < trail_min {
-                    new_pheromone = trail_min;
-                }
-                self.pheromones[i][j] = new_pheromone;
-                self.pheromones[j][i] = new_pheromone;
-            }
+            pheromones[i][j] = new_pheromone;
+            pheromones[j][i] = new_pheromone;
         }
     }
 }
-
-
-
-
 
 
 
