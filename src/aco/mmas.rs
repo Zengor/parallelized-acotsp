@@ -64,14 +64,13 @@ impl<'a> Colony<'a> for MMASColony<'a> {
     }
     
     
-    fn update_pheromones(&mut self, results: &Vec<AntResult>) {
+    fn update_pheromones(&mut self, best_this_iter: &AntResult, best_so_far: &AntResult) {
         self.evaporate();
-    
-        for a in results { 
-            for (&i,&j) in a.tour.iter().tuple_windows() {
-                self.pheromones[i][j] += 2.0; //TODO
-                self.pheromones[j][i] += 2.0;
-            }
+        let best_this_iter = super::find_best(results);
+        let d_tau = 1.0 / (best_this_iter.length as f64);
+        for (&i,&j) in best_this_iter.tour.iter().tuple_windows() {
+            self.pheromones[i][j] += d_tau;
+            self.pheromones[j][i] += self.pheromones[i][j];
         }   
     }
 }

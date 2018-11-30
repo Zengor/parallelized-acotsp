@@ -41,12 +41,12 @@ fn run_colony<'a>(mut colony: impl Colony<'a>, max_iterations: usize) {
     //initialize timer and logger
     //initialize pheromones
     //initialize nn_lists
-    let mut results_log = ResultLog::new(max_iterations);
+    let mut result_log = ResultLog::new(max_iterations);
     while !colony.check_termination() {
         colony.new_iteration();
         let results = colony.construct_solutions();
-        update_stats(&results, &mut results_log, colony.iteration());
-        colony.update_pheromones(&results);
+        update_stats(&results, &mut result_log, colony.iteration());
+        colony.update_pheromones(result_log.latest_tour(), result_log.best_tour());
     }
 }
 

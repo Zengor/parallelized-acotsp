@@ -8,6 +8,6 @@ pub trait Colony<'a> {
     fn new_iteration(&mut self);
     fn iteration(&self) -> usize;
     fn construct_solutions(&mut self) -> Vec<AntResult>;
-    fn update_pheromones(&mut self, results: &Vec<AntResult>);
+    fn update_pheromones(&mut self, best_this_iter: &AntResult, best_so_far: &AntResult);
 }
 

@@ -35,6 +35,14 @@ impl ResultLog {
         }
     }
 
+    pub fn latest_tour<'a>(&'a self) -> &'a AntResult {
+        &self.log[self.log.len()-1].result
+    }
+
+    pub fn best_tour<'a>(&'a self) -> &'a AntResult {
+        &self.log[self.best_so_far].result
+    }
+
     pub fn best_length(&self) -> usize {
         self.log[self.best_so_far].length()
     }
