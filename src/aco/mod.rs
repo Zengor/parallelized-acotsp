@@ -23,7 +23,7 @@ impl Default for Algorithm {
     fn default() -> Algorithm { Algorithm::ACS }
 }
 
-pub fn run_aco(data: &InstanceData, parameters: &AcoParameters) {
+pub fn run_aco(data: &InstanceData, parameters: &AcoParameters) -> ResultLog{
     let algorithm = &parameters.algorithm;
 
     match *algorithm {
@@ -32,12 +32,12 @@ pub fn run_aco(data: &InstanceData, parameters: &AcoParameters) {
             run_colony(colony, parameters.max_iterations)
         },
         Algorithm::ACS => {
-
+            unimplemented!()
         }
     }
 }
 
-fn run_colony<'a>(mut colony: impl Colony<'a>, max_iterations: usize) {
+fn run_colony<'a>(mut colony: impl Colony<'a>, max_iterations: usize) -> ResultLog {
     //initialize timer and logger
     //initialize pheromones
     //initialize nn_lists
@@ -48,6 +48,7 @@ fn run_colony<'a>(mut colony: impl Colony<'a>, max_iterations: usize) {
         update_stats(&results, &mut result_log, colony.iteration());
         colony.update_pheromones(result_log.latest_tour(), result_log.best_tour());
     }
+    result_log
 }
 
 fn generate_nn_list(data: &InstanceData) -> Vec<Vec<usize>>{
