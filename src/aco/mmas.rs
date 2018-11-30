@@ -2,6 +2,7 @@ use itertools::Itertools;
 
 use super::{AntResult, AcoParameters};
 use super::ant::{self, mmas_ant};
+use super::colony::{Colony, compute_combined_info};
 use crate::instance_data::InstanceData;
 use crate::util::{self, PheromoneMatrix};
 

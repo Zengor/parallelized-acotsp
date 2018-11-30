@@ -2,6 +2,7 @@ mod aco;
 mod util;
 mod instance_data;
 mod tsplibreader;
+mod timer;
 
 use std::fs::File;
 use std::io::prelude::*;
@@ -31,6 +32,7 @@ fn main() {
     let input_file = "test.tsp";
     let instance_file = read_instance_file(input_file);
     let parameters = AcoParameters::default();
+    
     let results = run_aco(&instance_file.data, &parameters);
     print_log(results, &format!("{} - {:?}", input_file, start_time));
 }
