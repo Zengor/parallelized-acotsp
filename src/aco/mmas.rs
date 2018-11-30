@@ -1,6 +1,5 @@
 use itertools::Itertools;
 
-use super::colony::{Colony, compute_combined_info};
 use super::{AntResult, AcoParameters};
 use super::ant::{self, mmas_ant};
 use crate::instance_data::InstanceData;
@@ -23,8 +22,6 @@ pub struct MMASColony<'a> {
 impl<'a> Colony<'a> for MMASColony<'a> {
     fn initialize_colony(data: &'a InstanceData, parameters: &'a AcoParameters) -> MMASColony<'a> {
         let nn_tour_length = ant::nearest_neighbour_tour(data, 0);
-        //let mut nn_list = Vec::with_capacity(data.size);
-        // TODO calculate nn_list
     
         let (trail_min, trail_max) = calculate_initial_values(nn_tour_length,
                                                               data.size, 
