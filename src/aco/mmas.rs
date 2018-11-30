@@ -68,7 +68,7 @@ impl<'a> Colony<'a> for MMASColony<'a> {
         let ant_to_use = match self.iteration % 25 {
             0 => best_so_far,
             _ => best_this_iter,
-        }
+        };
         ant::global_update_pheromones(&mut self.pheromones, ant_to_use);
     }
 }

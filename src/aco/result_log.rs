@@ -1,5 +1,6 @@
 use super::ant::AntResult;
 
+#[derive(Debug)]
 pub struct TimestampedResult {
     pub result: AntResult,
     pub iteration: usize,
@@ -22,6 +23,7 @@ impl TimestampedResult {
     }
 }
 
+#[derive(Debug)]
 pub struct ResultLog {
     pub log: Vec<TimestampedResult>,
     pub best_so_far: usize,    
@@ -41,6 +43,10 @@ impl ResultLog {
 
     pub fn best_tour<'a>(&'a self) -> &'a AntResult {
         &self.log[self.best_so_far].result
+    }
+
+    pub fn best_timestamped<'a>(&'a self) -> &'a TimestampedResult {
+        &self.log[self.best_so_far]
     }
 
     pub fn best_length(&self) -> usize {

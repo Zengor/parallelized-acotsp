@@ -5,7 +5,7 @@ use crate::util::{PheromoneMatrix, IntegerMatrix};
 use crate::instance_data::InstanceData;
 use super::aco_parameters::AcoParameters;
 
-#[derive(Default, Clone)]
+#[derive(Default, Clone, Debug)]
 pub struct AntResult {
     pub tour: IndexSet<usize>,
     pub length: usize,
@@ -72,7 +72,7 @@ pub fn nearest_neighbour_tour(data: &InstanceData, starting_city: usize) -> usiz
 }
 
 fn choose_best_next(curr_city: usize,
-                    visited: IndexSet<usize>,
+                    visited: &IndexSet<usize>,
                     combined_info: &PheromoneMatrix) -> usize {
     let (next_city,_) = combined_info[curr_city]
         .iter()
@@ -99,7 +99,7 @@ pub fn mmas_ant(data: &InstanceData,
     result.tour.insert(curr_city);
     for _ in 0..data.size-1 {
         //TODO use nn_list to aid performance
-        let next_city = unimplemented!();
+        let next_city = choose_best_next(curr_city, &result.tour, combined_info);
         result.insert(next_city, data.distances[curr_city][next_city]);
         curr_city = next_city;
     }
