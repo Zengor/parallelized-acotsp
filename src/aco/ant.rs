@@ -45,6 +45,7 @@ impl Ant {
     }
     
     fn insert(&mut self, new_node: usize, connection_length: usize) {
+        self.curr_city = new_node;
         self.tour.insert(new_node);
         self.length += connection_length;
     }
@@ -106,15 +107,14 @@ pub fn mmas_ant(data: &InstanceData,
                 combined_info: &PheromoneMatrix,
                 parameters: &AcoParameters) -> AntResult {
     let mut rng = thread_rng();
-    let mut curr_city: usize = rng.gen_range(0, data.size);
     let mut ant = Ant::new(data.size);
-    ant.tour.insert(curr_city);
+    ant.insert(rng.gen_range(0, data.size), 0);
     //ant.length = 0;
     for _ in 0..data.size-1 {
         //TODO use nn_list to aid performance
-        let next_city = choose_best_next(curr_city, &ant.tour, combined_info);
-        ant.insert(next_city, data.distances[curr_city][next_city]);
-        curr_city = next_city;
+        let next_city = choose_best_next(ant.curr_city, &ant.tour, combined_info);
+        ant.insert(next_city, data.distances[ant.curr_city][next_city]);
+        ant.curr_city = next_city;
     }
     // Include edge between last and initial node in the length
     ant.length += data.distances[ant.get_last()][ant.get_first()];
