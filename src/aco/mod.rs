@@ -42,13 +42,17 @@ fn run_colony<'a>(mut colony: impl Colony<'a>, max_iterations: usize) -> ResultL
     //initialize pheromones
     //initialize nn_lists
     let mut result_log = ResultLog::new(max_iterations);
-    while !colony.check_termination() {
+    while !check_termination(&colony, max_iterations) {
         colony.new_iteration();
         let results = colony.construct_solutions();
         update_stats(&results, &mut result_log, colony.iteration());
         colony.update_pheromones(result_log.latest_tour(), result_log.best_tour());
     }
     result_log
+}
+
+fn check_termination<'a>(colony: &impl Colony<'a>, max_iterations: usize) -> bool {
+    colony.iteration() > max_iterations
 }
 
 fn generate_nn_list(data: &InstanceData) -> Vec<Vec<usize>>{

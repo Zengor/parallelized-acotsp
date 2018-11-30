@@ -5,7 +5,6 @@ use crate::util::{self, IntegerMatrix, PheromoneMatrix};
 
 pub trait Colony<'a> {    
     fn initialize_colony(data: &'a InstanceData, parameters: &'a AcoParameters) -> Self;
-    fn check_termination(&self) -> bool;
     fn new_iteration(&mut self);
     fn iteration(&self) -> usize;
     fn construct_solutions(&mut self) -> Vec<AntResult>;

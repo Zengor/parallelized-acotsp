@@ -44,10 +44,6 @@ impl<'a> Colony<'a> for MMASColony<'a> {
         }
     }
 
-    fn check_termination(&self) -> bool {
-        unimplemented!()
-    }
-
     fn new_iteration(&mut self) {
         self.iteration += 1
     }
