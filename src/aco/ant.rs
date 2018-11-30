@@ -1,21 +1,27 @@
 use indexmap::IndexSet;
-use crate::util::{PheromoneMatrix};
+use itertools::Itertools;
+use rand::{thread_rng, Rng};
+use crate::util::{PheromoneMatrix, IntegerMatrix};
 use crate::instance_data::InstanceData;
 use super::aco_parameters::AcoParameters;
-use itertools::Itertools;
 
-#[derive(Default, Clone)]
+#[derive(Default, Clone, Debug)]
 pub struct AntResult {
     pub tour: IndexSet<usize>,
-    pub value: usize,
+    pub length: usize,
 }
 
 impl AntResult {
     fn new(data_size: usize) -> Self {
         AntResult {
             tour: IndexSet::with_capacity(data_size),
-            value: 0,
+            length: 0,
         }
+    }
+
+    fn insert(&mut self, new_node: usize, connection_length: usize) {
+        self.tour.insert(new_node);
+        self.length += connection_length;
     }
 
     fn get_first(&self) -> usize {
@@ -42,32 +48,62 @@ impl Ant {
     }
 }
 
-/// Form nearest neighbour tour given a starting city and return its value
+/// Form nearest neighbour tour given a starting city and return its length
 pub fn nearest_neighbour_tour(data: &InstanceData, starting_city: usize) -> usize {
     let mut result = AntResult::new(data.size);
     result.tour.insert(starting_city);
     let mut curr = starting_city;
-    
+    let mut next = starting_city;
+    let mut next_length = std::usize::MAX;
     while result.tour.len() != data.size {
-        // TODO find smallest (index,value) not in in O(n)
-        for (i,v) in data.distances[curr].iter().enumerate()
-            .sorted_by(|a,b| PartialOrd::partial_cmp(a.1,b.1).unwrap()) {
-                if result.tour.contains(&i) {
-                    continue
-                }               
-                result.tour.insert(i);
-                result.value += v;
-                curr = i;
-        }        
+        for (i,v) in data.distances[curr].iter().enumerate() {
+            if !result.tour.contains(&i) && v < &next_length {
+                next = i;
+                next_length = *v;
+            }
+        }
+        result.insert(next, next_length);
+        curr = next;
+        next_length = std::usize::MAX;
     }
-    // Include edge between last and initial node in the value
-    result.value += data.distances[result.get_last()][result.get_first()];
-    result.value
+    // Include edge between last and initial node in the length
+    result.length += data.distances[result.get_last()][result.get_first()];
+    result.length
+}
+
+fn choose_best_next(curr_city: usize,
+                    visited: &IndexSet<usize>,
+                    combined_info: &PheromoneMatrix) -> usize {
+    let (next_city,_) = combined_info[curr_city]
+        .iter()
+        .enumerate()
+        .filter(|(city,_)| !visited.contains(city))
+        .max_by(|(_,a),(_,b)| a.partial_cmp(b).unwrap()).unwrap();
+    next_city
+}
+
+pub fn global_update_pheromones(pheromones: &mut PheromoneMatrix, ant: &AntResult) {
+    let d_tau = 1.0 / (ant.length as f64);
+    for (&i,&j) in ant.tour.iter().tuple_windows() {
+        pheromones[i][j] += d_tau;
+        pheromones[j][i] =  pheromones[i][j];
+    }   
 }
 
 pub fn mmas_ant(data: &InstanceData,
-               pheromones: &PheromoneMatrix,
-               parameters: &AcoParameters) -> AntResult {
-    unimplemented!()
+                combined_info: &PheromoneMatrix,
+                parameters: &AcoParameters) -> AntResult {
+    let mut rng = thread_rng();
+    let mut curr_city: usize = rng.gen_range(0, data.size);
+    let mut result = AntResult::new(data.size);
+    result.tour.insert(curr_city);
+    for _ in 0..data.size-1 {
+        //TODO use nn_list to aid performance
+        let next_city = choose_best_next(curr_city, &result.tour, combined_info);
+        result.insert(next_city, data.distances[curr_city][next_city]);
+        curr_city = next_city;
+    }
+    // Include edge between last and initial node in the length
+    result.length += data.distances[result.get_last()][result.get_first()];
+    result
 }
-

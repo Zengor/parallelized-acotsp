@@ -15,32 +15,16 @@ impl InstanceData {
 
 }
 
+#[allow(non_camel_case_types)]
 pub enum DataDescriptionType {
     NODE_COORD_SECTION,
-    DEPOT_SECTION,
-    DEMAND_SECTION,
-    EDGE_DATA_SECTION,
-    FIXED_EDGES_SECTION,
-    DISPLAY_DATA_SECTION,
-    TOUR_SECTION,
-    EDGE_WEIGHT_SECTION,
-
+    // Other variants left out until implemented
 }
 
+#[allow(non_camel_case_types)]
 pub enum EdgeWeightType {
-    EXPLICIT,
     EUC_2D,
-    EUC_3D,
-    MAX_2D,
-    MAX_3D,
-    MAN_2D,
-    MAN_3D,
-    CEIL_2D,
-    GEO,
-    ATT,
-    XRAY1,
-    XRAY2,
-    SPECIAL
+    // Other variants left out until implemented
 }
 impl FromStr for EdgeWeightType {
     type Err = String;

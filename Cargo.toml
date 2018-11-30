@@ -3,8 +3,8 @@ authors = ["Iago"]
 edition = "2018"
 name = "parallelized-acotsp"
 version = "0.1.0"
-
 [dependencies]
 indexmap = "1.0.2"
 itertools = "0.7.11"
+lazy_static = "1.2.0"
 rand = "0.6.1"

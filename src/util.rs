@@ -4,7 +4,7 @@ pub type IntegerMatrix = Vec<Vec<usize>>;
 pub fn generate_pheromone_matrix(size: usize, value: f64) -> PheromoneMatrix {
     let mut matrix = generate_filled_matrix(size, value);
     for i in 0..size {
-        matrix[i][i] = 0.0;
+        matrix[i][i] = std::f64::INFINITY;
     }
     matrix
 }
