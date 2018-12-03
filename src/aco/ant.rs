@@ -1,7 +1,7 @@
 use indexmap::IndexSet;
 use itertools::Itertools;
 use rand::{thread_rng, Rng};
-use crate::util::{PheromoneMatrix, IntegerMatrix};
+use crate::util::{FloatMatrix, IntegerMatrix};
 use crate::instance_data::InstanceData;
 use super::aco_parameters::AcoParameters;
 
@@ -86,7 +86,7 @@ pub fn nearest_neighbour_tour(data: &InstanceData, starting_city: usize) -> usiz
 
 fn choose_best_next(curr_city: usize,
                     visited: &IndexSet<usize>,
-                    combined_info: &PheromoneMatrix) -> usize {
+                    combined_info: &FloatMatrix) -> usize {
     let (next_city,_) = combined_info[curr_city]
         .iter()
         .enumerate()
@@ -95,7 +95,7 @@ fn choose_best_next(curr_city: usize,
     next_city
 }
 
-pub fn global_update_pheromones(pheromones: &mut PheromoneMatrix, ant: &AntResult) {
+pub fn global_update_pheromones(pheromones: &mut FloatMatrix, ant: &AntResult) {
     let d_tau = 1.0 / (ant.length as f64);
     for (&i,&j) in ant.tour.iter().tuple_windows() {
         pheromones[i][j] += d_tau;
@@ -104,7 +104,7 @@ pub fn global_update_pheromones(pheromones: &mut PheromoneMatrix, ant: &AntResul
 }
 
 pub fn mmas_ant(data: &InstanceData,
-                combined_info: &PheromoneMatrix,
+                combined_info: &FloatMatrix,
                 parameters: &AcoParameters) -> AntResult {
     let mut rng = thread_rng();
     let mut ant = Ant::new(data.size);

@@ -6,7 +6,7 @@ mod result_log;
 mod colony;
 
 use itertools::Itertools;
-use crate::util::{PheromoneMatrix, IntegerMatrix};
+use crate::util::{FloatMatrix, IntegerMatrix};
 use crate::instance_data::InstanceData;
 
 pub use self::aco_parameters::{AcoParameters, Algorithm};
@@ -65,7 +65,7 @@ fn find_best<'a>(results: &'a [AntResult]) -> &'a AntResult {
     results.iter().min_by(|x,y| PartialOrd::partial_cmp(&x.length,&y.length).unwrap()).unwrap()
 }
 
-pub fn total_value(distances: &IntegerMatrix, pheromones: &PheromoneMatrix,
+pub fn total_value(distances: &IntegerMatrix, pheromones: &FloatMatrix,
                parameters: &AcoParameters, i: usize, j: usize) -> f64 {
     pheromones[i][j].powf(parameters.alpha) * heuristic(distances, i, j).powf(parameters.beta)
 }

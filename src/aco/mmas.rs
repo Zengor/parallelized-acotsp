@@ -4,14 +4,14 @@ use super::{AntResult, AcoParameters};
 use super::ant::{self, mmas_ant};
 use super::colony::{Colony, compute_combined_info};
 use crate::instance_data::InstanceData;
-use crate::util::{self, PheromoneMatrix};
+use crate::util::{self, FloatMatrix};
 
 pub struct MMASColony<'a> {
     iteration: usize,
     data: &'a InstanceData,
-    pheromones: PheromoneMatrix,
+    pheromones: FloatMatrix,
     /// Combined pheromone + heuristic information
-    combined_info: PheromoneMatrix,
+    combined_info: FloatMatrix,
     nn_list: Vec<Vec<usize>>,    
     /// Maximum pheromone value for MMAS. This is calculated by the colony.
     pub trail_max: f64,
@@ -28,7 +28,9 @@ impl<'a> Colony<'a> for MMASColony<'a> {
                                                               data.size, 
                                                               parameters);
         let pheromones = util::generate_pheromone_matrix(data.size, trail_max);
-        let combined_info = compute_combined_info(&data.distances, &pheromones, parameters);
+        let (heuristic_ifo,combined_info) = compute_combined_info(&data.distances,
+                                                                  &pheromones,
+                                                                  parameters);
         
         Self {
             iteration: 0,
@@ -76,7 +78,7 @@ fn calculate_initial_values(nn_tour_length: usize,
     (trail_min, trail_max)
 }
 
-fn evaporate(pheromones: &mut PheromoneMatrix,
+fn evaporate(pheromones: &mut FloatMatrix,
              evap_rate: f64,
              trail_min: f64) {
     for i in 0..pheromones.len() {

@@ -1,4 +1,4 @@
-use crate::util::{self, PheromoneMatrix};
+use crate::util::{self, FloatMatrix};
 use crate::instance_data::InstanceData;
 
 use super::ant;
@@ -10,9 +10,9 @@ use super::AntResult;
 pub struct ACSColony<'a> {
     iteration: usize,
     data: &'a InstanceData,
-    pheromones: PheromoneMatrix,
+    pheromones: FloatMatrix,
     /// Combined pheromone + heuristic information
-    combined_info: PheromoneMatrix,
+    combined_info: FloatMatrix,
     nn_list: Vec<Vec<usize>>,
     initial_trail: f64,
     parameters: &'a AcoParameters,

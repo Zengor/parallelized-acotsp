@@ -1,4 +1,4 @@
-pub type PheromoneMatrix = Vec<Vec<f64>>;
+pub type FloatMatrix = Vec<Vec<f64>>;
 pub type IntegerMatrix = Vec<Vec<usize>>;
 
 pub fn generate_pheromone_matrix(size: usize, value: f64) -> PheromoneMatrix {

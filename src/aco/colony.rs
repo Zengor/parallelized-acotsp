@@ -1,7 +1,7 @@
 use super::AcoParameters;
 use super::ant::AntResult;
 use crate::instance_data::InstanceData;
-use crate::util::{self, IntegerMatrix, PheromoneMatrix};
+use crate::util::{self, IntegerMatrix, FloatMatrix};
 
 pub trait Colony<'a> {    
     fn initialize_colony(data: &'a InstanceData, parameters: &'a AcoParameters) -> Self;
@@ -12,8 +12,8 @@ pub trait Colony<'a> {
 }
 
 pub fn compute_combined_info(distances: &IntegerMatrix,
-                         pheromones: &PheromoneMatrix,
-                         parameters: &AcoParameters) -> PheromoneMatrix {
+                         pheromones: &FloatMatrix,
+                         parameters: &AcoParameters) -> FloatMatrix {
     let mut combined_info = util::generate_filled_matrix(distances.len(), 0.0);
     for i in 0..distances.len() {
         for j in 0..i {
