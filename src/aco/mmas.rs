@@ -10,7 +10,9 @@ pub struct MMASColony<'a> {
     iteration: usize,
     data: &'a InstanceData,
     pheromones: FloatMatrix,
-    /// Combined pheromone + heuristic information
+    /// Heuristic information based on the distance, calculated on initialization
+    heuristic_info: FloatMatrix,
+    /// Combined pheromone + heuristic information, recalculated every iteration
     combined_info: FloatMatrix,
     nn_list: Vec<Vec<usize>>,    
     /// Maximum pheromone value for MMAS. This is calculated by the colony.
@@ -28,7 +30,7 @@ impl<'a> Colony<'a> for MMASColony<'a> {
                                                               data.size, 
                                                               parameters);
         let pheromones = util::generate_pheromone_matrix(data.size, trail_max);
-        let (heuristic_ifo,combined_info) = compute_combined_info(&data.distances,
+        let (heuristic_info,combined_info) = compute_combined_info(&data.distances,
                                                                   &pheromones,
                                                                   parameters);
         
@@ -36,6 +38,7 @@ impl<'a> Colony<'a> for MMASColony<'a> {
             iteration: 0,
             data,
             pheromones,
+            heuristic_info,
             combined_info,
             nn_list: super::generate_nn_list(data),
             trail_max,

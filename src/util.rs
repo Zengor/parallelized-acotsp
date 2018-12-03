@@ -1,7 +1,7 @@
 pub type FloatMatrix = Vec<Vec<f64>>;
 pub type IntegerMatrix = Vec<Vec<usize>>;
 
-pub fn generate_pheromone_matrix(size: usize, value: f64) -> PheromoneMatrix {
+pub fn generate_pheromone_matrix(size: usize, value: f64) -> FloatMatrix {
     let mut matrix = generate_filled_matrix(size, value);
     for i in 0..size {
         matrix[i][i] = std::f64::INFINITY;

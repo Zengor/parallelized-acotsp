@@ -11,7 +11,9 @@ pub struct ACSColony<'a> {
     iteration: usize,
     data: &'a InstanceData,
     pheromones: FloatMatrix,
-    /// Combined pheromone + heuristic information
+    /// Heuristic information based on the distance, calculated on initialization
+    heuristic_info: FloatMatrix,
+    /// Combined pheromone + heuristic information, recalculated every iteration
     combined_info: FloatMatrix,
     nn_list: Vec<Vec<usize>>,
     initial_trail: f64,
@@ -23,12 +25,15 @@ impl<'a> Colony<'a> for ACSColony<'a> {
         let nn_tour_length = ant::nearest_neighbour_tour(data,0);
         let initial_trail = calculate_initial_values(nn_tour_length, data.size);
         let pheromones = util::generate_pheromone_matrix(data.size, initial_trail);
-        let combined_info = compute_combined_info(&data.distances, &pheromones, parameters);
+        let (heuristic_info, combined_info) = compute_combined_info(&data.distances,
+                                                                   &pheromones,
+                                                                   parameters);
         
         Self {
             iteration: 0,
             data,
             pheromones,
+            heuristic_info,
             combined_info,
             nn_list: super::generate_nn_list(data),
             initial_trail,

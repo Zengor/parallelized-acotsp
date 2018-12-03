@@ -65,9 +65,10 @@ fn find_best<'a>(results: &'a [AntResult]) -> &'a AntResult {
     results.iter().min_by(|x,y| PartialOrd::partial_cmp(&x.length,&y.length).unwrap()).unwrap()
 }
 
-pub fn total_value(distances: &IntegerMatrix, pheromones: &FloatMatrix,
-               parameters: &AcoParameters, i: usize, j: usize) -> f64 {
-    pheromones[i][j].powf(parameters.alpha) * heuristic(distances, i, j).powf(parameters.beta)
+pub fn total_value(pheromone: f64,
+                   heuristic: f64,
+                   parameters: &AcoParameters) -> f64 {
+    pheromone.powf(parameters.alpha) * heuristic.powf(parameters.beta)
 }
 
 fn heuristic(distances: &IntegerMatrix, i: usize, j: usize) -> f64 {

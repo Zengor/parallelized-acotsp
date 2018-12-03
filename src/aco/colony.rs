@@ -12,15 +12,19 @@ pub trait Colony<'a> {
 }
 
 pub fn compute_combined_info(distances: &IntegerMatrix,
-                         pheromones: &FloatMatrix,
-                         parameters: &AcoParameters) -> FloatMatrix {
+                             pheromones: &FloatMatrix,
+                             parameters: &AcoParameters) -> (FloatMatrix, FloatMatrix) {
+    let mut heuristic_info = util::generate_filled_matrix(distances.len(), 0.0);
     let mut combined_info = util::generate_filled_matrix(distances.len(), 0.0);
     for i in 0..distances.len() {
         for j in 0..i {
-            combined_info[i][j] = super::total_value(distances, pheromones,
-                                                     parameters, i, j);
+            heuristic_info[i][j] = super::heuristic(distances, i, j);
+            heuristic_info[j][i] = heuristic_info[i][j];
+            combined_info[i][j] = super::total_value(pheromones[i][j],
+                                                     heuristic_info[i][j],
+                                                     parameters);
             combined_info[j][i] = combined_info[i][j];
         }
     }
-    combined_info
+    (heuristic_info, combined_info)
 }
