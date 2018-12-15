@@ -1,6 +1,7 @@
 use indexmap::IndexSet;
 use itertools::Itertools;
 use rand::{thread_rng, Rng};
+use rand::distributions::WeightedIndex;
 use crate::util::{FloatMatrix, IntegerMatrix};
 use crate::instance_data::InstanceData;
 use super::aco_parameters::AcoParameters;
@@ -111,8 +112,14 @@ pub fn mmas_ant(data: &InstanceData,
     ant.insert(rng.gen_range(0, data.size), 0);
     //ant.length = 0;
     for _ in 0..data.size-1 {
+        let unvisited = combined_info[curr_city]
+            .iter()
+            .enumerate()
+            .filter(|(city,_)| !visited.contains(city));
+        let distribution = WeightedIndex::new(unvisited.map(|(_,x)| x)).unwrap();
+        let next_city = unvisited.nth(distribution.sample(&mut rng));        
         //TODO use nn_list to aid performance
-        let next_city = choose_best_next(ant.curr_city, &ant.tour, combined_info);
+        //let next_city = choose_best_next(ant.curr_city, &ant.tour, combined_info);
         ant.insert(next_city, data.distances[ant.curr_city][next_city]);
         ant.curr_city = next_city;
     }
