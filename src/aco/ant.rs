@@ -115,13 +115,12 @@ pub fn mmas_ant(data: &InstanceData,
         let unvisited = combined_info[curr_city]
             .iter()
             .enumerate()
-            .filter(|(city,_)| !visited.contains(city));
+            .filter(|(city,_)| !ant.visited.contains(city));
         let distribution = WeightedIndex::new(unvisited.map(|(_,x)| x)).unwrap();
         let next_city = unvisited.nth(distribution.sample(&mut rng));        
         //TODO use nn_list to aid performance
         //let next_city = choose_best_next(ant.curr_city, &ant.tour, combined_info);
         ant.insert(next_city, data.distances[ant.curr_city][next_city]);
-        ant.curr_city = next_city;
     }
     // Include edge between last and initial node in the length
     ant.length += data.distances[ant.get_last()][ant.get_first()];
