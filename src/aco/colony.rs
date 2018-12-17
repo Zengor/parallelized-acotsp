@@ -22,7 +22,8 @@ pub fn compute_combined_info(distances: &IntegerMatrix,
             heuristic_info[j][i] = heuristic_info[i][j];
             combined_info[i][j] = super::total_value(pheromones[i][j],
                                                      heuristic_info[i][j],
-                                                     parameters);
+                                                     parameters.alpha,
+                                                     parameters.beta);
             combined_info[j][i] = combined_info[i][j];
         }
     }

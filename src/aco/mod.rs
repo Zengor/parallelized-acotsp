@@ -67,8 +67,9 @@ fn find_best<'a>(results: &'a [AntResult]) -> &'a AntResult {
 
 pub fn total_value(pheromone: f64,
                    heuristic: f64,
-                   parameters: &AcoParameters) -> f64 {
-    pheromone.powf(parameters.alpha) * heuristic.powf(parameters.beta)
+                   alpha: f64,
+                   beta: f64) -> f64 {
+    pheromone.powf(alpha) * heuristic.powf(beta)
 }
 
 fn heuristic(distances: &IntegerMatrix, i: usize, j: usize) -> f64 {
