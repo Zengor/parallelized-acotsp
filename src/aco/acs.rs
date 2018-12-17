@@ -56,7 +56,7 @@ impl<'a> Colony<'a> for ACSColony<'a> {
     }
     
     fn update_pheromones(&mut self, _: &AntResult, best_so_far: &AntResult) {
-        global_update_pheromones(&mut self.pheromones, &mut self.combined_info, self.parameters.evaporation_rate, best_so_far);
+        global_update_pheromones(&mut self.pheromones, &mut self.heuristic_info, &mut self.combined_info, self.parameters, best_so_far);
     }
 }
 
@@ -65,13 +65,19 @@ fn calculate_initial_values(nn_tour_length: usize, num_nodes: usize) -> f64 {
 }
 
 fn global_update_pheromones(pheromones: &mut FloatMatrix, 
+                            heuristic_info: &mut FloatMatrix,
                             combined_info: &mut FloatMatrix,
-                            evaporation_rate: f64,
+                            parameters: &AcoParameters,
                             best_so_far: &AntResult) {
     let d_tau = 1.0 / best_so_far.length as f64;
-    let coefficient = 1.0 - evaporation_rate;
+    let coefficient = 1.0 - parameters.evaporation_rate;
     for (&i,&j) in best_so_far.tour.iter().tuple_windows() {
-        pheromones[i][j] = coefficient * pheromones[i][j] + evaporation_rate * d_tau;
+        pheromones[i][j] = coefficient * pheromones[i][j] + parameters.evaporation_rate * d_tau;
         pheromones[j][i] = pheromones[i][j];
+        combined_info[i][j] = super::total_value(pheromones[i][j],
+                                                 heuristic_info[i][j],
+                                                 parameters.alpha,
+                                                 parameters.beta);
+        combined_info[j][i] = combined_info[i][j];
     }   
 }
