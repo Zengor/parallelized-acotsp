@@ -68,7 +68,7 @@ impl<'a> Colony<'a> for MMASColony<'a> {
             0 => best_so_far,
             _ => best_this_iter,
         };
-        ant::global_update_pheromones(&mut self.pheromones, ant_to_use);
+        global_update_pheromones(&mut self.pheromones, ant_to_use);
     }
 }
 
@@ -96,5 +96,11 @@ fn evaporate(pheromones: &mut FloatMatrix,
     }
 }
 
-
+pub fn global_update_pheromones(pheromones: &mut FloatMatrix, ant: &AntResult) {
+    let d_tau = 1.0 / (ant.length as f64);
+    for (&i,&j) in ant.tour.iter().tuple_windows() {
+        pheromones[i][j] += d_tau;
+        pheromones[j][i] =  pheromones[i][j];
+    }   
+}
 

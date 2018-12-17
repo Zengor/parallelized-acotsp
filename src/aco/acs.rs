@@ -1,3 +1,5 @@
+use itertools::Itertools;
+
 use crate::util::{self, FloatMatrix};
 use crate::instance_data::InstanceData;
 
@@ -53,11 +55,23 @@ impl<'a> Colony<'a> for ACSColony<'a> {
         unimplemented!()
     }
     
-    fn update_pheromones(&mut self, best_this_iter: &AntResult, best_so_far: &AntResult) {
-
+    fn update_pheromones(&mut self, _: &AntResult, best_so_far: &AntResult) {
+        global_update_pheromones(&mut self.pheromones, &mut self.combined_info, self.parameters.evaporation_rate, best_so_far);
     }
 }
 
 fn calculate_initial_values(nn_tour_length: usize, num_nodes: usize) -> f64 {
     1.0 / (num_nodes * nn_tour_length) as f64
+}
+
+fn global_update_pheromones(pheromones: &mut FloatMatrix, 
+                            combined_info: &mut FloatMatrix,
+                            evaporation_rate: f64,
+                            best_so_far: &AntResult) {
+    let d_tau = 1.0 / best_so_far.length as f64;
+    let coefficient = 1.0 - evaporation_rate;
+    for (&i,&j) in best_so_far.tour.iter().tuple_windows() {
+        pheromones[i][j] = coefficient * pheromones[i][j] + evaporation_rate * d_tau;
+        pheromones[j][i] = pheromones[i][j];
+    }   
 }

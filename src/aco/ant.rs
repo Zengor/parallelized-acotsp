@@ -96,14 +96,6 @@ fn choose_best_next(curr_city: usize,
     next_city
 }
 
-pub fn global_update_pheromones(pheromones: &mut FloatMatrix, ant: &AntResult) {
-    let d_tau = 1.0 / (ant.length as f64);
-    for (&i,&j) in ant.tour.iter().tuple_windows() {
-        pheromones[i][j] += d_tau;
-        pheromones[j][i] =  pheromones[i][j];
-    }   
-}
-
 pub fn mmas_ant(data: &InstanceData,
                 combined_info: &FloatMatrix,
                 parameters: &AcoParameters) -> AntResult {
