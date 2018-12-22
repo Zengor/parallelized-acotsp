@@ -22,7 +22,7 @@ impl AntResult {
 }
 
 #[derive(Default)]
-struct Ant {
+pub struct Ant {
     tour: IndexSet<usize>,
     length: usize,
     curr_city: usize,
@@ -37,7 +37,7 @@ impl Ant {
         }
     }
     
-    fn drain_to_result(&mut self) -> AntResult {
+    pub fn drain_to_result(&mut self) -> AntResult {
         let tour = self.tour.drain(..).collect();
         AntResult {
             tour,
@@ -118,4 +118,26 @@ pub fn mmas_ant(data: &InstanceData,
     // Include edge between last and initial node in the length
     ant.length += data.distances[ant.get_last()][ant.get_first()];
     ant.drain_to_result()
+}
+
+pub fn create_ants(num_ants: usize, data_size: usize) -> Vec<Ant> {
+    let mut v =  Vec::with_capacity(num_ants);
+    for _ in 0..num_ants {
+        v.push(Ant::new(data_size));
+    }
+    v
+}
+
+
+pub fn acs_ant_step(ant: &mut Ant,
+                    data: &InstanceData,
+                    combined_info: &FloatMatrix,
+                    parameters: &AcoParameters) {
+    let mut rng = thread_rng();
+    let q: f64 = rng.gen();
+    if q < parameters.q_0 {
+        // get max heuristic info
+    } else {
+        //get probabilistic
+    }
 }

@@ -52,7 +52,16 @@ impl<'a> Colony<'a> for ACSColony<'a> {
     }
     
     fn construct_solutions(&mut self) -> Vec<AntResult> {
-        unimplemented!()
+        let n_ants = self.parameters.num_ants;
+        let data_size = self.data.size;
+        let mut ants_vec = ant::create_ants(n_ants, data_size);
+        for _ in 0..data_size {
+            for ant in ants_vec.iter_mut() {
+                ant::acs_ant_step(ant, self.data, &self.combined_info, self.parameters);
+                //local pheromone update here
+            }
+        }
+        ants_vec.into_iter().map(|mut a| a.drain_to_result()).collect()
     }
     
     fn update_pheromones(&mut self, _: &AntResult, best_so_far: &AntResult) {
