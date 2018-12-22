@@ -1,6 +1,6 @@
 use indexmap::IndexSet;
 use itertools::Itertools;
-use rand::{thread_rng, Rng};
+use rand::{thread_rng, ThreadRng, Rng};
 use rand::distributions::{Distribution, WeightedIndex};
 use crate::util::{FloatMatrix, IntegerMatrix};
 use crate::instance_data::InstanceData;
@@ -96,21 +96,26 @@ fn choose_best_next(curr_city: usize,
     next_city
 }
 
+fn choose_probabilistically(curr_city: usize,
+                            visited: &IndexSet<usize>,
+                            combined_info: &FloatMatrix) -> usize {
+    let mut unvisited = combined_info[curr_city]
+        .iter()
+        .enumerate()
+        .filter(|(city,_)| !visited.contains(city));
+    let unvisited_weights = unvisited.clone().map(|(_,x)| x);
+    let distribution = WeightedIndex::new(unvisited_weights).unwrap();
+    unvisited.nth(distribution.sample(&mut thread_rng())).unwrap().0 
+}
+
 pub fn mmas_ant(data: &InstanceData,
                 combined_info: &FloatMatrix,
                 parameters: &AcoParameters) -> AntResult {
-    let mut rng = thread_rng();
     let mut ant = Ant::new(data.size);
-    ant.insert(rng.gen_range(0, data.size), 0);
+    ant.insert(thread_rng().gen_range(0, data.size), 0);
     //ant.length = 0;
     for _ in 0..data.size-1 {
-        let mut unvisited = combined_info[ant.curr_city]
-            .iter()
-            .enumerate()
-            .filter(|(city,_)| !ant.tour.contains(city));
-        let unvisited_weights = unvisited.clone().map(|(_,x)| x);
-        let distribution = WeightedIndex::new(unvisited_weights).unwrap();
-        let next_city = unvisited.nth(distribution.sample(&mut rng)).unwrap().0;      
+        let next_city = choose_probabilistically(ant.curr_city, &ant.tour, combined_info);
         //TODO use nn_list to aid performance
         //let next_city = choose_best_next(ant.curr_city, &ant.tour, combined_info);
         ant.insert(next_city, data.distances[ant.curr_city][next_city]);
@@ -132,12 +137,15 @@ pub fn create_ants(num_ants: usize, data_size: usize) -> Vec<Ant> {
 pub fn acs_ant_step(ant: &mut Ant,
                     data: &InstanceData,
                     combined_info: &FloatMatrix,
-                    parameters: &AcoParameters) {
-    let mut rng = thread_rng();
-    let q: f64 = rng.gen();
-    if q < parameters.q_0 {
+                    parameters: &AcoParameters) {    
+    // note: acs assumes an aplha value of 1 in all cases
+    let q: f64 = thread_rng().gen();
+    let next_city = if q < parameters.q_0 {
         // get max heuristic info
+        choose_best_next(ant.curr_city, &ant.tour, combined_info)
     } else {
         //get probabilistic
-    }
+        choose_probabilistically(ant.curr_city, &ant.tour, combined_info)
+    };
+    ant.insert(next_city, data.distances[ant.curr_city][next_city]);
 }
