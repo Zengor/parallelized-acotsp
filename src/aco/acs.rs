@@ -59,6 +59,7 @@ impl<'a> Colony<'a> for ACSColony<'a> {
             for ant in ants_vec.iter_mut() {
                 ant::acs_ant_step(ant, self.data, &self.combined_info, self.parameters);
                 //local pheromone update here
+                self.local_pheromone_update(ant);
             }
         }
         ants_vec.into_iter().map(|mut a| a.drain_to_result()).collect()
@@ -66,6 +67,15 @@ impl<'a> Colony<'a> for ACSColony<'a> {
     
     fn update_pheromones(&mut self, _: &AntResult, best_so_far: &AntResult) {
         global_update_pheromones(&mut self.pheromones, &mut self.heuristic_info, &mut self.combined_info, self.parameters, best_so_far);
+    }
+}
+
+impl ACSColony<'_> {
+    fn local_pheromone_update(&mut self, ant: &ant::Ant) {
+        let (i,j) = ant.get_last_arc();
+        let modified_old_pherom = (1.0 - self.parameters.xi) * self.pheromones[i][j];
+        let added_pherom = self.parameters.xi * self.initial_trail;
+        self.pheromones[i][j] = modified_old_pherom + added_pherom;
     }
 }
 

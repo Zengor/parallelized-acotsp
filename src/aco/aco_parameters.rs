@@ -27,6 +27,10 @@ pub struct AcoParameters {
     /// Probability an ant will make best possible move during tour construction in ACS
     #[serde(default = "default_q0")]
     pub q_0: f64,
+    /// Used to calculate coefficients in local pheromone update in ACS
+    /// (old pheromone is (1-xi), new is xi). Between 0 and 1.
+    #[serde(default = "default_xi")]
+    pub xi: f64, 
     pub algorithm: Algorithm,
     /// Maximum number of iterations a colony may run
     #[serde(default = "default_max_iterations")]
@@ -41,6 +45,7 @@ fn default_alpha() -> f64 { 1.0 }
 fn default_beta() -> f64 { 2.5 } 
 fn default_evap() -> f64 { 0.02 }
 fn default_q0() -> f64 { 0.9 }
+fn default_xi() -> f64 { 0.1 }
 fn default_max_iterations() -> usize { 1000 }
 fn default_time_limit() -> usize { std::usize::MAX }
 

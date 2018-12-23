@@ -58,6 +58,10 @@ impl Ant {
     fn get_last(&self) -> usize {
         *self.tour.get_index(self.tour.len()-1).unwrap()
     }
+
+    pub fn get_last_arc(&self) -> (usize, usize) {
+        (*self.tour.get_index(self.tour.len()-2).unwrap(), self.get_last())
+    }
 }
 
 /// Form nearest neighbour tour given a starting city and return its length
@@ -144,7 +148,7 @@ pub fn acs_ant_step(ant: &mut Ant,
         // get max heuristic info
         choose_best_next(ant.curr_city, &ant.tour, combined_info)
     } else {
-        //get probabilistic
+        //get probabilistic        
         choose_probabilistically(ant.curr_city, &ant.tour, combined_info)
     };
     ant.insert(next_city, data.distances[ant.curr_city][next_city]);
