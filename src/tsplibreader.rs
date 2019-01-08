@@ -17,6 +17,7 @@ pub fn read_instance_file(f_name: &str) -> FileData {
         match split[0].trim() {
             "NAME" => metadata.name = split[1].to_owned(),
             "DIMENSION" => size = split[1].parse().unwrap(),
+            "EDGE_WEIGHT_TYPE" => metadata.edge_weight_type = Some(split[1].parse().unwrap()),
             "NODE_COORD_SECTION" => { 
                 data_layout = NODE_COORD_SECTION;
                 break;
@@ -45,6 +46,9 @@ fn read_node_coord_section(lines: std::io::Lines<BufReader<&File>>,
     let mut nodes: Vec<(usize, usize)> = Vec::with_capacity(size);
     for line in lines {
         let line = line.unwrap();
+        if line.trim() == "EOF" {
+            break;
+        }
         let split: Vec<_> = line.split_whitespace().collect();
         nodes.push((split[1].parse().unwrap(), split[2].parse().unwrap()));
     }

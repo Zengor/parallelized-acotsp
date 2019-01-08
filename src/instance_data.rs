@@ -29,7 +29,10 @@ pub enum EdgeWeightType {
 impl FromStr for EdgeWeightType {
     type Err = String;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        unimplemented!()
+        match s {
+            "EUC_2D" => Ok(EdgeWeightType::EUC_2D),
+            _ => unimplemented!()
+        }
     }
 }
 

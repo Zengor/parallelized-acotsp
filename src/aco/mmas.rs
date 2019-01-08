@@ -72,7 +72,9 @@ impl<'a> Colony<'a> for MMASColony<'a> {
     }
 }
 
-/// Calculates initial pheromone trails, as well as trail_max and trail_min for MMAS
+/// Calculates trail_min and trail_max for MMAS. trail_max is to be used as initial pheormone value.
+/// 
+/// Returns tuple (trail_min, trail_max)
 fn calculate_initial_values(nn_tour_length: usize,
                             num_nodes: usize,
                             parameters: &AcoParameters) -> (f64, f64) {

@@ -31,8 +31,9 @@ fn main() {
     let start_time = std::time::Instant::now();
     let input_file = "test.tsp";
     let instance_file = read_instance_file(input_file);
+    println!("test");
     let parameters = AcoParameters::default();
-    
+    println!("input read, moving to execution");
     let results = run_aco(&instance_file.data, &parameters);
-    print_log(results, &format!("{} - {:?}", input_file, start_time));
+    print_log(results, &format!("{} - {:?}", input_file, start_time)).expect("failed writing log");
 }

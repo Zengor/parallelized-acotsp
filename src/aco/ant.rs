@@ -129,6 +129,8 @@ pub fn mmas_ant(data: &InstanceData,
     ant.drain_to_result()
 }
 
+/// Generates a vec of `Ant`s. To be used with ACS so it can step each ant individually and 
+/// update pheromones locally.
 pub fn create_ants(num_ants: usize, data_size: usize) -> Vec<Ant> {
     let mut v =  Vec::with_capacity(num_ants);
     for _ in 0..num_ants {
@@ -137,7 +139,7 @@ pub fn create_ants(num_ants: usize, data_size: usize) -> Vec<Ant> {
     v
 }
 
-
+/// A single step for an `Ant` in the ACS algorithm. `ant` is updated to be in a new city.
 pub fn acs_ant_step(ant: &mut Ant,
                     data: &InstanceData,
                     combined_info: &FloatMatrix,
