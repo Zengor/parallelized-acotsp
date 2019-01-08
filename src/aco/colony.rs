@@ -1,5 +1,5 @@
 use super::AcoParameters;
-use super::ant::AntResult;
+use super::ant::Ant;
 use crate::instance_data::InstanceData;
 use crate::util::{self, IntegerMatrix, FloatMatrix};
 
@@ -7,8 +7,8 @@ pub trait Colony<'a> {
     fn initialize_colony(data: &'a InstanceData, parameters: &'a AcoParameters) -> Self;
     fn new_iteration(&mut self);
     fn iteration(&self) -> usize;
-    fn construct_solutions(&mut self) -> Vec<AntResult>;
-    fn update_pheromones(&mut self, best_this_iter: &AntResult, best_so_far: &AntResult);
+    fn construct_solutions(&mut self) -> Vec<Ant>;
+    fn update_pheromones(&mut self, best_this_iter: &Ant, best_so_far: &Ant);
 }
 
 pub fn compute_combined_info(distances: &IntegerMatrix,

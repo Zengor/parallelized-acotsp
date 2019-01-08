@@ -2,30 +2,16 @@ use indexmap::IndexSet;
 use itertools::Itertools;
 use rand::{thread_rng, ThreadRng, Rng};
 use rand::distributions::{Distribution, WeightedIndex};
+use lazy_static::lazy_static;
 use crate::util::{FloatMatrix, IntegerMatrix};
 use crate::instance_data::InstanceData;
 use super::aco_parameters::AcoParameters;
 
 #[derive(Default, Clone, Debug)]
-pub struct AntResult {
-    pub tour: Vec<usize>,
-    pub length: u32,
-}
-
-impl AntResult {
-    fn new(data_size: usize) -> Self {
-        AntResult {
-            tour: Vec::with_capacity(data_size),
-            length: 0,
-        }
-    }
-}
-
-#[derive(Default)]
 pub struct Ant {
-    tour: IndexSet<usize>,
-    length: u32,
-    curr_city: usize,
+    pub tour: IndexSet<usize>,
+    pub length: u32,
+    pub curr_city: usize,
 }
 
 impl Ant {
@@ -37,13 +23,16 @@ impl Ant {
         }
     }
     
-    pub fn drain_to_result(&mut self) -> AntResult {
-        let tour = self.tour.drain(..).collect();
-        AntResult {
-            tour,
-            length: self.length,
-        }
-    }
+    // pub fn drain_to_result(&mut self) -> AntResult {
+    //     let tour = self.tour.drain(..).collect();
+    //     self.length = 0;
+    //     self.curr_city = 0;
+
+    //     AntResult {
+    //         tour,
+    //         length: self.length,
+    //     }
+    // }
     
     fn insert(&mut self, new_node: usize, connection_length: u32) {
         self.curr_city = new_node;
@@ -117,8 +106,7 @@ fn choose_probabilistically(curr_city: usize,
 }
 
 pub fn mmas_ant(data: &InstanceData,
-                combined_info: &FloatMatrix,
-                parameters: &AcoParameters) -> AntResult {
+                combined_info: &FloatMatrix) -> Ant {    
     let mut ant = Ant::new(data.size);
     ant.insert(thread_rng().gen_range(0, data.size), 0);
     //ant.length = 0;
@@ -130,7 +118,7 @@ pub fn mmas_ant(data: &InstanceData,
     }
     // Include edge between last and initial node in the length
     ant.length += data.distances[ant.get_last()][ant.get_first()];
-    ant.drain_to_result()
+    ant
 }
 
 /// Generates a vec of `Ant`s. To be used with ACS so it can step each ant individually and 

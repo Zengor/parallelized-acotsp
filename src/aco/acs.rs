@@ -6,7 +6,7 @@ use crate::instance_data::InstanceData;
 use super::ant;
 use super::colony::{Colony, compute_combined_info};
 use super::AcoParameters;
-use super::AntResult;
+use super::Ant;
 
 
 pub struct ACSColony<'a> {
@@ -51,7 +51,7 @@ impl<'a> Colony<'a> for ACSColony<'a> {
         self.iteration
     }
     
-    fn construct_solutions(&mut self) -> Vec<AntResult> {
+    fn construct_solutions(&mut self) -> Vec<Ant> {
         let n_ants = self.parameters.num_ants;
         let data_size = self.data.size;
         let mut ants_vec = ant::create_ants(n_ants, data_size);
@@ -62,10 +62,10 @@ impl<'a> Colony<'a> for ACSColony<'a> {
                 self.local_pheromone_update(ant);
             }
         }
-        ants_vec.into_iter().map(|mut a| a.drain_to_result()).collect()
+        ants_vec
     }
     
-    fn update_pheromones(&mut self, _: &AntResult, best_so_far: &AntResult) {
+    fn update_pheromones(&mut self, _: &Ant, best_so_far: &Ant) {
         global_update_pheromones(&mut self.pheromones, &mut self.heuristic_info, &mut self.combined_info, self.parameters, best_so_far);
     }
 }
@@ -87,7 +87,7 @@ fn global_update_pheromones(pheromones: &mut FloatMatrix,
                             heuristic_info: &mut FloatMatrix,
                             combined_info: &mut FloatMatrix,
                             parameters: &AcoParameters,
-                            best_so_far: &AntResult) {
+                            best_so_far: &Ant) {
     let d_tau = 1.0 / best_so_far.length as f64;
     let coefficient = 1.0 - parameters.evaporation_rate;
     for (&i,&j) in best_so_far.tour.iter().tuple_windows() {

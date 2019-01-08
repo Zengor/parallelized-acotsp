@@ -10,7 +10,7 @@ use crate::util::{FloatMatrix, IntegerMatrix};
 use crate::instance_data::InstanceData;
 
 pub use self::aco_parameters::{AcoParameters, Algorithm};
-pub use self::ant::AntResult;
+pub use self::ant::Ant;
 pub use self::result_log::{TimestampedResult, ResultLog};
 use self::colony::Colony;
 
@@ -56,12 +56,12 @@ fn generate_nn_list(data: &InstanceData) -> Vec<Vec<u32>>{
 }
 
 
-fn update_stats(iter_results: &[AntResult], result_log: &mut ResultLog, iteration: usize) {
+fn update_stats(iter_results: &[Ant], result_log: &mut ResultLog, iteration: usize) {
     let best_this_iter = find_best(iter_results);
     result_log.push(best_this_iter.to_owned(), iteration);
 }
 
-fn find_best<'a>(results: &'a [AntResult]) -> &'a AntResult {
+fn find_best<'a>(results: &'a [Ant]) -> &'a Ant {
     results.iter().min_by_key(|x| x.length).unwrap()
 }
 

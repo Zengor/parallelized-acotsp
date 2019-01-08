@@ -1,6 +1,6 @@
 use itertools::Itertools;
 
-use super::{AntResult, AcoParameters};
+use super::{Ant, AcoParameters};
 use super::ant::{self, mmas_ant};
 use super::colony::{Colony, compute_combined_info};
 use crate::instance_data::InstanceData;
@@ -25,7 +25,6 @@ pub struct MMASColony<'a> {
 impl<'a> Colony<'a> for MMASColony<'a> {
     fn initialize_colony(data: &'a InstanceData, parameters: &'a AcoParameters) -> MMASColony<'a> {
         let nn_tour_length = ant::nearest_neighbour_tour(data, 0);
-    
         let (trail_min, trail_max) = calculate_initial_values(nn_tour_length,
                                                               data.size, 
                                                               parameters);
@@ -55,14 +54,15 @@ impl<'a> Colony<'a> for MMASColony<'a> {
         self.iteration
     }
 
-    fn construct_solutions(&mut self) -> Vec<AntResult> {
+    fn construct_solutions(&mut self) -> Vec<Ant> {
+            //println!("new construction {}", self.iteration);
         let n_ants = self.parameters.num_ants;
         (0..n_ants).into_iter()
-            .map(|_| mmas_ant(self.data, &self.combined_info, self.parameters))
+            .map(|_| mmas_ant(self.data, &self.combined_info))
             .collect()
     }
     
-    fn update_pheromones(&mut self, best_this_iter: &AntResult, best_so_far: &AntResult) {
+    fn update_pheromones(&mut self, best_this_iter: &Ant, best_so_far: &Ant) {
         evaporate(&mut self.pheromones, self.parameters.evaporation_rate, self.trail_min);        
         let ant_to_use = match self.iteration % 25 {
             0 => best_so_far,
@@ -98,7 +98,7 @@ fn evaporate(pheromones: &mut FloatMatrix,
     }
 }
 
-pub fn global_update_pheromones(pheromones: &mut FloatMatrix, ant: &AntResult) {
+pub fn global_update_pheromones(pheromones: &mut FloatMatrix, ant: &Ant) {
     let d_tau = 1.0 / (ant.length as f64);
     for (&i,&j) in ant.tour.iter().tuple_windows() {
         pheromones[i][j] += d_tau;
