@@ -62,7 +62,6 @@ fn update_stats(iter_results: &[AntResult], result_log: &mut ResultLog, iteratio
 }
 
 fn find_best<'a>(results: &'a [AntResult]) -> &'a AntResult {
-    println!("{:?}", results);
     results.iter().min_by_key(|x| x.length).unwrap()
 }
 

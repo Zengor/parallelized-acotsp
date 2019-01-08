@@ -54,7 +54,7 @@ impl ResultLog {
     }
 
     pub fn push(&mut self, new: AntResult, iteration: usize) {
-        let is_new_best = new.length < self.best_length();
+        let is_new_best = self.log.is_empty() || new.length < self.best_length();
         let timestamped = TimestampedResult::new(new, iteration, is_new_best);
         self.log.push(timestamped);
         if is_new_best {
