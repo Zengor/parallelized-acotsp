@@ -56,6 +56,10 @@ fn read_node_coord_section(lines: std::io::Lines<BufReader<&File>>,
     for &i in nodes.iter() {
         let mut distances_from_this_node: Vec<u32> = Vec::with_capacity(size);
         for &j in nodes.iter() {
+            if i == j {
+                distances_from_this_node.push(std::u32::MAX);
+                continue;
+            }
             match metadata.edge_weight_type.as_ref().expect("No defined edge_weight_type") {
                 EUC_2D => distances_from_this_node.push(distance_funcs::euc_2d(i, j)),
                 _ => unimplemented!(),
