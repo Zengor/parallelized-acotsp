@@ -43,7 +43,7 @@ fn read_node_coord_section(lines: std::io::Lines<BufReader<&File>>,
     use crate::util::distance_funcs;
     use crate::instance_data::EdgeWeightType::*;
     
-    let mut nodes: Vec<(usize, usize)> = Vec::with_capacity(size);
+    let mut nodes: Vec<(i32, i32)> = Vec::with_capacity(size);
     for line in lines {
         let line = line.unwrap();
         if line.trim() == "EOF" {
@@ -52,9 +52,9 @@ fn read_node_coord_section(lines: std::io::Lines<BufReader<&File>>,
         let split: Vec<_> = line.split_whitespace().collect();
         nodes.push((split[1].parse().unwrap(), split[2].parse().unwrap()));
     }
-    let mut distances: Vec<Vec<usize>> = Vec::with_capacity(size);
+    let mut distances: crate::util::IntegerMatrix = Vec::with_capacity(size);
     for &i in nodes.iter() {
-        let mut distances_from_this_node: Vec<usize> = Vec::with_capacity(size);
+        let mut distances_from_this_node: Vec<u32> = Vec::with_capacity(size);
         for &j in nodes.iter() {
             match metadata.edge_weight_type.as_ref().expect("No defined edge_weight_type") {
                 EUC_2D => distances_from_this_node.push(distance_funcs::euc_2d(i, j)),

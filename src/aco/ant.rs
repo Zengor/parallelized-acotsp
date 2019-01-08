@@ -9,7 +9,7 @@ use super::aco_parameters::AcoParameters;
 #[derive(Default, Clone, Debug)]
 pub struct AntResult {
     pub tour: Vec<usize>,
-    pub length: usize,
+    pub length: u32,
 }
 
 impl AntResult {
@@ -24,7 +24,7 @@ impl AntResult {
 #[derive(Default)]
 pub struct Ant {
     tour: IndexSet<usize>,
-    length: usize,
+    length: u32,
     curr_city: usize,
 }
 
@@ -45,7 +45,7 @@ impl Ant {
         }
     }
     
-    fn insert(&mut self, new_node: usize, connection_length: usize) {
+    fn insert(&mut self, new_node: usize, connection_length: u32) {
         self.curr_city = new_node;
         self.tour.insert(new_node);
         self.length += connection_length;
@@ -65,12 +65,12 @@ impl Ant {
 }
 
 /// Form nearest neighbour tour given a starting city and return its length
-pub fn nearest_neighbour_tour(data: &InstanceData, starting_city: usize) -> usize {
+pub fn nearest_neighbour_tour(data: &InstanceData, starting_city: usize) -> u32 {
     let mut tour = IndexSet::with_capacity(data.size);
     tour.insert(starting_city);
     let mut curr = starting_city;
     let mut next = starting_city;
-    let mut next_length = std::usize::MAX;
+    let mut next_length = std::u32::MAX;
     let mut length = 0;
     while tour.len() != data.size {
         for (i,v) in data.distances[curr].iter().enumerate() {
@@ -82,13 +82,15 @@ pub fn nearest_neighbour_tour(data: &InstanceData, starting_city: usize) -> usiz
         tour.insert(next);
         length += next_length;
         curr = next;
-        next_length = std::usize::MAX;
+        next_length = std::u32::MAX;
     }
     // Include edge between last and initial node in the length
     length += data.distances[tour.pop().unwrap()][*tour.get_index(0).unwrap()];
     length
 }
 
+/// Chooses an unvisited city to go to with the highest total combined heuristic+pheromone information
+/// Returns the index of that city.
 fn choose_best_next(curr_city: usize,
                     visited: &IndexSet<usize>,
                     combined_info: &FloatMatrix) -> usize {
@@ -100,6 +102,8 @@ fn choose_best_next(curr_city: usize,
     next_city
 }
 
+/// Chooses an unvisited city to go to using the proportional rule defined in the literature.
+/// Returns the index of that city.
 fn choose_probabilistically(curr_city: usize,
                             visited: &IndexSet<usize>,
                             combined_info: &FloatMatrix) -> usize {

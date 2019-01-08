@@ -79,8 +79,8 @@ impl ACSColony<'_> {
     }
 }
 
-fn calculate_initial_values(nn_tour_length: usize, num_nodes: usize) -> f64 {
-    1.0 / (num_nodes * nn_tour_length) as f64
+fn calculate_initial_values(nn_tour_length: u32, num_nodes: usize) -> f64 {
+    1.0 / (num_nodes * nn_tour_length as usize) as f64
 }
 
 fn global_update_pheromones(pheromones: &mut FloatMatrix, 

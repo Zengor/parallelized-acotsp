@@ -18,7 +18,7 @@ impl TimestampedResult {
         }
     }
 
-    fn length(&self) -> usize {
+    fn length(&self) -> u32 {
         self.result.length
     }
 }
@@ -49,7 +49,7 @@ impl ResultLog {
         &self.log[self.best_so_far]
     }
 
-    pub fn best_length(&self) -> usize {
+    pub fn best_length(&self) -> u32 {
         self.log[self.best_so_far].length()
     }
 

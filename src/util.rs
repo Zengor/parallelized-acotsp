@@ -1,5 +1,5 @@
 pub type FloatMatrix = Vec<Vec<f64>>;
-pub type IntegerMatrix = Vec<Vec<usize>>;
+pub type IntegerMatrix = Vec<Vec<u32>>;
 
 pub fn generate_pheromone_matrix(size: usize, value: f64) -> FloatMatrix {
     let mut matrix = generate_filled_matrix(size, value);
@@ -18,7 +18,7 @@ pub fn generate_filled_matrix<T: Copy>(size: usize, element: T) -> Vec<Vec<T>> {
 }
 
 pub mod distance_funcs {
-    pub fn euc_2d(i: (usize, usize), j: (usize, usize)) -> usize {
-        (((i.0 - j.0).pow(2) * (i.1 - j.1).pow(2)) as f64).sqrt().round() as usize
+    pub fn euc_2d(i: (i32, i32), j: (i32, i32)) -> u32 {
+        (((i.0 - j.0).pow(2) * (i.1 - j.1).pow(2)) as f64).sqrt().round() as u32
     }
 }

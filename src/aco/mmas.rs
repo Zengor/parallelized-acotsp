@@ -75,7 +75,7 @@ impl<'a> Colony<'a> for MMASColony<'a> {
 /// Calculates trail_min and trail_max for MMAS. trail_max is to be used as initial pheormone value.
 /// 
 /// Returns tuple (trail_min, trail_max)
-fn calculate_initial_values(nn_tour_length: usize,
+fn calculate_initial_values(nn_tour_length: u32,
                             num_nodes: usize,
                             parameters: &AcoParameters) -> (f64, f64) {
     let trail_max = 1.0 / (parameters.evaporation_rate * nn_tour_length as f64);

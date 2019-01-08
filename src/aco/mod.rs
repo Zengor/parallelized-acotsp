@@ -43,7 +43,7 @@ fn check_termination<'a>(colony: &impl Colony<'a>, max_iterations: usize) -> boo
     colony.iteration() > max_iterations
 }
 
-fn generate_nn_list(data: &InstanceData) -> Vec<Vec<usize>>{
+fn generate_nn_list(data: &InstanceData) -> Vec<Vec<u32>>{
     let mut nn_list = Vec::with_capacity(data.size);
     for i in 0..data.size {
         let mut sorted = data.distances[i].iter()
