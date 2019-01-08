@@ -62,7 +62,8 @@ fn update_stats(iter_results: &[AntResult], result_log: &mut ResultLog, iteratio
 }
 
 fn find_best<'a>(results: &'a [AntResult]) -> &'a AntResult {
-    results.iter().min_by(|x,y| PartialOrd::partial_cmp(&x.length,&y.length).unwrap()).unwrap()
+    println!("{:?}", results);
+    results.iter().min_by_key(|x| x.length).unwrap()
 }
 
 pub fn total_value(pheromone: f64,
