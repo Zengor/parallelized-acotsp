@@ -14,7 +14,7 @@ pub struct MMASColony<'a> {
     heuristic_info: FloatMatrix,
     /// Combined pheromone + heuristic information, recalculated every iteration
     combined_info: FloatMatrix,
-    nn_list: Vec<Vec<usize>>,    
+    //nn_list: Vec<Vec<usize>>,    
     /// Maximum pheromone value for MMAS. This is calculated by the colony.
     pub trail_max: f64,
     /// Minimum pheromone value for MMAS. This is calculated by the colony.
@@ -40,7 +40,7 @@ impl<'a> Colony<'a> for MMASColony<'a> {
             pheromones,
             heuristic_info,
             combined_info,
-            nn_list: super::generate_nn_list(data),
+            //nn_list: super::generate_nn_list(data),
             trail_max,
             trail_min,
             parameters,

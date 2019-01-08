@@ -17,7 +17,7 @@ pub struct ACSColony<'a> {
     heuristic_info: FloatMatrix,
     /// Combined pheromone + heuristic information, recalculated every iteration
     combined_info: FloatMatrix,
-    nn_list: Vec<Vec<usize>>,
+    //nn_list: Vec<Vec<usize>>,
     initial_trail: f64,
     parameters: &'a AcoParameters,
 }
@@ -37,7 +37,7 @@ impl<'a> Colony<'a> for ACSColony<'a> {
             pheromones,
             heuristic_info,
             combined_info,
-            nn_list: super::generate_nn_list(data),
+            //nn_list: super::generate_nn_list(data),
             initial_trail,
             parameters,
         }
