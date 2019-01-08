@@ -10,7 +10,7 @@ impl Default for Algorithm {
     fn default() -> Algorithm { Algorithm::MMAS }
 }
 
-#[derive(Default, Deserialize)]
+#[derive(Deserialize)]
 pub struct AcoParameters {
     #[serde(default = "default_num_ants")]
     pub num_ants: usize,
@@ -38,6 +38,22 @@ pub struct AcoParameters {
     /// Maximum time in seconds that a colony may run
     #[serde(default = "default_time_limit")]
     pub time_limit: usize,
+}
+
+impl Default for AcoParameters {
+    fn default() -> AcoParameters {
+        AcoParameters {
+            num_ants: default_num_ants (),
+            alpha: default_alpha(),
+            beta: default_beta(),
+            evaporation_rate: default_evap(),
+            q_0: default_q0(),
+            xi: default_xi(),
+            algorithm: Default::default(),
+            max_iterations: default_max_iterations(),
+            time_limit: default_time_limit(),
+        }
+    }
 }
 
 fn default_num_ants () -> usize { 10 }
