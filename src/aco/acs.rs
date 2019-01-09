@@ -73,10 +73,17 @@ impl<'a> Colony<'a> for ACSColony<'a> {
 impl ACSColony<'_> {
     fn local_pheromone_update(&mut self, ant: &ant::Ant) {
         let (i,j) = ant.get_last_arc();
-        let modified_old_pherom = (1.0 - self.parameters.xi) * self.pheromones[i][j];
-        let added_pherom = self.parameters.xi * self.initial_trail;
+        // making them local variables for convenience and readability
+        let (alpha, beta, xi) = (self.parameters.alpha, self.parameters.beta, self.parameters.xi);
+        // calculating new pheromone value
+        let modified_old_pherom = (1.0 - xi) * self.pheromones[i][j];
+        let added_pherom = xi * self.initial_trail;
         self.pheromones[i][j] = modified_old_pherom + added_pherom;
-    }
+        self.pheromones[j][i] = self.pheromones[i][j];
+        // update combined info
+        self.combined_info[i][j] = super::total_value(self.pheromones[i][j], self.heuristic_info[i][j], alpha, beta);
+        self.combined_info[j][i] = self.combined_info[i][j];
+    }    
 }
 
 fn calculate_initial_values(nn_tour_length: u32, num_nodes: usize) -> f64 {
