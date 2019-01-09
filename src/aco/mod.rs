@@ -27,7 +27,8 @@ pub fn run_aco(data: &InstanceData, parameters: &AcoParameters) -> ResultLog{
             run_colony(colony, parameters.max_iterations)
         }
         Algorithm::ACS => {
-            unimplemented!()
+            let colony = acs::ACSColony::initialize_colony(data, parameters);
+            run_colony(colony, parameters.max_iterations)
         }
     }
 }
