@@ -3,11 +3,12 @@ use serde_derive::Deserialize;
 #[derive(Deserialize)]
 pub enum Algorithm {
     MMAS,
+    MMASPar,
     ACS,
 }
 
 impl Default for Algorithm {
-    fn default() -> Algorithm { Algorithm::MMAS }
+    fn default() -> Algorithm { Algorithm::MMASPar }
 }
 
 #[derive(Deserialize)]
@@ -56,9 +57,9 @@ impl Default for AcoParameters {
     }
 }
 
-fn default_num_ants () -> usize { 10 }
+fn default_num_ants () -> usize { 280 }
 fn default_alpha() -> f64 { 1.0 }
-fn default_beta() -> f64 { 2.5 } 
+fn default_beta() -> f64 { 5.0 } 
 fn default_evap() -> f64 { 0.02 }
 fn default_q0() -> f64 { 0.9 }
 fn default_xi() -> f64 { 0.1 }
