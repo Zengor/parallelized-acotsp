@@ -1,10 +1,11 @@
+use std::time::Duration;
 use super::ant::Ant;
 
 #[derive(Debug)]
 pub struct TimestampedResult {
     pub result: Ant,
     pub iteration: usize,
-    pub timestamp: std::time::Instant,
+    pub timestamp: Duration,
     pub is_new_best: bool
 }
 
@@ -13,7 +14,7 @@ impl TimestampedResult {
         TimestampedResult {
             result,
             iteration,            
-            timestamp: std::time::Instant::now(),
+            timestamp: crate::timer::elapsed(),
             is_new_best,
         }
     }

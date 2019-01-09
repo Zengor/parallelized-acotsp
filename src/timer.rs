@@ -20,7 +20,7 @@ impl Stopwatch {
 }
 
 
-pub fn start_timer() {
+pub fn restart_timer() {
     TIMER.lock().unwrap().start = Instant::now();
 }
 
