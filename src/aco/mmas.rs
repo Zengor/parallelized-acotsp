@@ -50,7 +50,7 @@ impl<'a> Colony<'a> for MMASColony<'a> {
     }
 
     fn new_iteration(&mut self) {
-        self.iteration += 1
+        self.iteration += 1; 
     }
 
     fn iteration(&self) -> usize { 
@@ -72,13 +72,14 @@ impl<'a> Colony<'a> for MMASColony<'a> {
         let (min, max) = calculate_bounding_values(best_so_far.length, self.data.size, evap_rate);
         self.trail_min = min;
         self.trail_max = max;
-        evaporate(&mut self.pheromones, evap_rate, self.trail_min);        
+        evaporate(&mut self.pheromones, evap_rate);        
         let ant_to_use = match self.iteration % 25 {
             0 => best_so_far,
             _ => best_this_iter,
         };
         global_update_pheromones(&mut self.pheromones, ant_to_use);
-        recompute_combined_info(&mut self.combined_info, &self.heuristic_info, &self.pheromones, self.parameters);
+        self.check_trail_limits();
+        recompute_combined_info(&mut self.combined_info, &self.pheromones, &self.heuristic_info, self.parameters); 
     }
 }
 
@@ -87,6 +88,21 @@ impl<'a> MMASColony<'a> {
         let mut colony = MMASColony::initialize_colony(data, parameters);
         colony.parallel = true;
         colony
+    }
+
+    fn check_trail_limits(&mut self) {
+        for i in 0..self.pheromones.len() {
+            for j in 0..i {
+                if self.pheromones[i][j] < self.trail_min {
+                    self.pheromones[i][j] = self.trail_min;
+                    self.pheromones[j][i] = self.trail_min;
+                }
+                if self.pheromones[i][j] > self.trail_max {
+                    self.pheromones[i][j] = self.trail_max;
+                    self.pheromones[j][i] = self.trail_max;
+                }
+            }
+    }
     }
 }
 /// Calculates trail_min and trail_max for MMAS given best tour length. trail_max is to be used as initial pheormone value.
@@ -102,13 +118,10 @@ fn calculate_bounding_values(tour_length: u32,
 
 fn evaporate(pheromones: &mut FloatMatrix,
              evap_rate: f64,
-             trail_min: f64) {
+             ) {
     for i in 0..pheromones.len() {
         for j in 0..i {
             let mut new_pheromone = (1.0 - evap_rate) * pheromones[i][j];
-            if new_pheromone < trail_min {
-                new_pheromone = trail_min;
-            }
             pheromones[i][j] = new_pheromone;
             pheromones[j][i] = new_pheromone;
         }
@@ -118,7 +131,8 @@ fn evaporate(pheromones: &mut FloatMatrix,
 pub fn global_update_pheromones(pheromones: &mut FloatMatrix, ant: &Ant) {
     let d_tau = 1.0 / (ant.length as f64);
     for (&i,&j) in ant.tour.iter().tuple_windows() {
-        pheromones[i][j] += d_tau;
-        pheromones[j][i] =  pheromones[i][j];
+        let mut new_pheromone = pheromones[i][j] + d_tau;
+        pheromones[i][j] = new_pheromone;
+        pheromones[j][i] = pheromones[i][j];
     }   
 }

@@ -93,7 +93,7 @@ fn choose_best_next(curr_city: usize,
         .iter()
         .enumerate()
         .filter(|(city,_)| !visited.contains(city))
-        .max_by(|(_,a),(x,b)| a.partial_cmp(b).unwrap()).unwrap();
+        .max_by(|(_,a),(_,b)| a.partial_cmp(b).unwrap()).unwrap();
     next_city
 }
 
