@@ -144,16 +144,13 @@ pub fn acs_ant_step(ant: &mut Ant,
                     combined_info: &FloatMatrix,
                     parameters: &AcoParameters) {    
     // note: acs assumes an aplha value of 1 in all cases
-    let q: f64 = thread_rng().gen();
-    let next_city = if q < parameters.q_0 {
-        println!("determ" );
+
+    let next_city = if thread_rng().gen_bool(parameters.q_0) {
         // get max heuristic info
         choose_best_next(ant.curr_city, &ant.tour, combined_info)
     } else {
-        //get probabilistic 
-        println!("nondeterm");       
+        //get probabilistic      
         choose_probabilistically(ant.curr_city, &ant.tour, combined_info)
     };
     ant.insert(next_city, data.distances[ant.curr_city][next_city]);
-    println!("ant step");
 }
