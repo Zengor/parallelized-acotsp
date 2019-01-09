@@ -1,4 +1,5 @@
 use itertools::Itertools;
+use rayon::prelude::*;
 
 use crate::util::{self, FloatMatrix};
 use crate::instance_data::InstanceData;
@@ -55,7 +56,7 @@ impl<'a> Colony<'a> for ACSColony<'a> {
         let n_ants = self.parameters.num_ants;
         let data_size = self.data.size;
         let mut ants_vec = ant::create_ants(n_ants, data_size);
-        for _ in 0..data_size {
+        for _ in 0..data_size-1 {
             for ant in ants_vec.iter_mut() {
                 ant::acs_ant_step(ant, self.data, &self.combined_info, self.parameters);
                 //local pheromone update here
