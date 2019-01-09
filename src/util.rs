@@ -4,7 +4,7 @@ pub type IntegerMatrix = Vec<Vec<u32>>;
 pub fn generate_pheromone_matrix(size: usize, value: f64) -> FloatMatrix {
     let mut matrix = generate_filled_matrix(size, value);
     for i in 0..size {
-        matrix[i][i] = std::f64::INFINITY;
+        matrix[i][i] = std::f64::MAX;
     }
     matrix
 }
@@ -21,4 +21,17 @@ pub mod distance_funcs {
     pub fn euc_2d(i: (i32, i32), j: (i32, i32)) -> u32 {
         (((i.0 - j.0).pow(2) + (i.1 - j.1).pow(2)) as f64).sqrt().round() as u32
     }
+}
+
+#[cfg(test)]
+pub mod test {
+    use super::distance_funcs::*;
+
+    #[test]
+    pub fn euc_2d_1010_2020() {
+        let x = (10,10);
+        let y = (20,20);
+        assert_eq!(euc_2d(x,y), 14);
+    }
+
 }
