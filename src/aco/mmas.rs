@@ -9,12 +9,13 @@ use crate::util::{self, FloatMatrix};
 
 pub struct MMASColony<'a> {
     iteration: usize,
+    parallel: bool,
     data: &'a InstanceData,
     pheromones: FloatMatrix,
     /// Heuristic information based on the distance, calculated on initialization
     heuristic_info: FloatMatrix,
     /// Combined pheromone + heuristic information, recalculated every iteration
-    combined_info: FloatMatrix,
+    combined_info: FloatMatrix,    
     //nn_list: Vec<Vec<usize>>,    
     /// Maximum pheromone value for MMAS. This is calculated by the colony.
     pub trail_max: f64,
@@ -36,6 +37,7 @@ impl<'a> Colony<'a> for MMASColony<'a> {
         
         Self {
             iteration: 0,
+            parallel: false,
             data,
             pheromones,
             heuristic_info,
@@ -57,82 +59,13 @@ impl<'a> Colony<'a> for MMASColony<'a> {
 
     fn construct_solutions(&mut self) -> Vec<Ant> {
             //println!("new construction {}", self.iteration);
-        let n_ants = self.parameters.num_ants;
-        (0..n_ants).into_iter()
-            .map(|_| mmas_ant(self.data, &self.combined_info))
-            .collect()
-    }
-    
-    fn update_pheromones(&mut self, best_this_iter: &Ant, best_so_far: &Ant) {
-        let evap_rate = self.parameters.evaporation_rate;
-        let (min, max) = calculate_bounding_values(best_so_far.length, self.data.size, evap_rate);
-        self.trail_min = min;
-        self.trail_max = max;
-        evaporate(&mut self.pheromones, evap_rate, self.trail_min);        
-        let ant_to_use = match self.iteration % 25 {
-            0 => best_so_far,
-            _ => best_this_iter,
-        };
-        global_update_pheromones(&mut self.pheromones, ant_to_use);
-        recompute_combined_info(&mut self.combined_info, &self.heuristic_info, &self.pheromones, self.parameters);
-    }
-}
-
-pub struct ParallelMMAS<'a> {
-    iteration: usize,
-    data: &'a InstanceData,
-    pheromones: FloatMatrix,
-    /// Heuristic information based on the distance, calculated on initialization
-    heuristic_info: FloatMatrix,
-    /// Combined pheromone + heuristic information, recalculated every iteration
-    combined_info: FloatMatrix,
-    //nn_list: Vec<Vec<usize>>,    
-    /// Maximum pheromone value for MMAS. This is calculated by the colony.
-    pub trail_max: f64,
-    /// Minimum pheromone value for MMAS. This is calculated by the colony.
-    pub trail_min: f64,
-    parameters: &'a AcoParameters,
-}
-
-impl<'a> Colony<'a> for ParallelMMAS<'a> {
-    fn initialize_colony(data: &'a InstanceData, parameters: &'a AcoParameters) -> ParallelMMAS<'a> {
-        let nn_tour_length = ant::nearest_neighbour_tour(data, 0);
-        let (trail_min, trail_max) = calculate_bounding_values(nn_tour_length,
-                                                              data.size, 
-                                                              parameters.evaporation_rate);
-        let pheromones = util::generate_pheromone_matrix(data.size, trail_max);
-        let (heuristic_info,combined_info) = compute_combined_info(&data.distances,
-                                                                  &pheromones,
-                                                                  parameters);
-        
-        Self {
-            iteration: 0,
-            data,
-            pheromones,
-            heuristic_info,
-            combined_info,
-            //nn_list: super::generate_nn_list(data),
-            trail_max,
-            trail_min,
-            parameters,
+        let range = (0..self.parameters.num_ants);
+        if self.parallel {   
+            range.into_par_iter().map(|_| mmas_ant(self.data, &self.combined_info)).collect()
+        } else {  
+            range.into_iter().map(|_| mmas_ant(self.data, &self.combined_info)).collect()
         }
     }
-
-    fn new_iteration(&mut self) {
-        self.iteration += 1
-    }
-
-    fn iteration(&self) -> usize { 
-        self.iteration
-    }
-
-    fn construct_solutions(&mut self) -> Vec<Ant> {
-            //println!("new construction {}", self.iteration);
-        let n_ants = self.parameters.num_ants;
-        (0..n_ants).into_par_iter()
-            .map(|_| mmas_ant(self.data, &self.combined_info))
-            .collect()
-    }
     
     fn update_pheromones(&mut self, best_this_iter: &Ant, best_so_far: &Ant) {
         let evap_rate = self.parameters.evaporation_rate;
@@ -149,6 +82,13 @@ impl<'a> Colony<'a> for ParallelMMAS<'a> {
     }
 }
 
+impl<'a> MMASColony<'a> {
+    pub fn initialize_parallel(data: &'a InstanceData, parameters: &'a AcoParameters) -> Self {
+        let mut colony = MMASColony::initialize_colony(data, parameters);
+        colony.parallel = true;
+        colony
+    }
+}
 /// Calculates trail_min and trail_max for MMAS given best tour length. trail_max is to be used as initial pheormone value.
 /// 
 /// Returns tuple (trail_min, trail_max)
