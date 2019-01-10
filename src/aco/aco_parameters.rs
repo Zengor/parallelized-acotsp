@@ -5,10 +5,11 @@ pub enum Algorithm {
     MMAS,
     MMASPar,
     ACS,
+    ACSParMasterUpdate,
 }
 
 impl Default for Algorithm {
-    fn default() -> Algorithm { Algorithm::MMASPar }
+    fn default() -> Algorithm { Algorithm::ACS }
 }
 
 #[derive(Deserialize)]

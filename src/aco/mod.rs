@@ -23,11 +23,15 @@ pub fn run_aco(data: &InstanceData, parameters: &AcoParameters) -> ResultLog{
             run_colony(colony, parameters.max_iterations)
         },
         Algorithm::MMASPar => {
-            let mut colony = mmas::MMASColony::initialize_parallel(data, parameters);
+            let mut colony = mmas::MMASColony::initialize_parallel(data, parameters);        
             run_colony(colony, parameters.max_iterations)
         }
         Algorithm::ACS => {
             let colony = acs::ACSColony::initialize_colony(data, parameters);
+            run_colony(colony, parameters.max_iterations)
+        }
+        Algorithm::ACSParMasterUpdate => {
+            let colony = acs::ACSColony::initialize_parallel(data, parameters);
             run_colony(colony, parameters.max_iterations)
         }
     }

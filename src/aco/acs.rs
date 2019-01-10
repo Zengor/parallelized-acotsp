@@ -12,6 +12,7 @@ use super::Ant;
 
 pub struct ACSColony<'a> {
     iteration: usize,
+    parallel: bool,
     data: &'a InstanceData,
     pheromones: FloatMatrix,
     /// Heuristic information based on the distance, calculated on initialization
@@ -34,6 +35,7 @@ impl<'a> Colony<'a> for ACSColony<'a> {
         
         Self {
             iteration: 0,
+            parallel: false,
             data,
             pheromones,
             heuristic_info,
@@ -56,11 +58,22 @@ impl<'a> Colony<'a> for ACSColony<'a> {
         let n_ants = self.parameters.num_ants;
         let data_size = self.data.size;
         let mut ants_vec = ant::create_ants(n_ants, data_size);
-        for _ in 0..data_size-1 {
-            for ant in ants_vec.iter_mut() {
-                ant::acs_ant_step(ant, self.data, &self.combined_info, self.parameters);
-                //local pheromone update here
-                self.local_pheromone_update(ant);
+        if self.parallel {
+            for _ in 0..data_size-1 {
+                ants_vec = ants_vec.into_par_iter().map(|ant| {
+                    ant::acs_ant_step(ant, self.data, &self.combined_info, self.parameters)             
+                }).collect();
+                for ant in ants_vec.iter(){
+                    self.local_pheromone_update(ant);  
+                }
+            }
+        } else {
+            for _ in 0..data_size-1 {
+                ants_vec = ants_vec.into_iter().map(|ant| {
+                    let ant = ant::acs_ant_step(ant, self.data, &self.combined_info, self.parameters);
+                    self.local_pheromone_update(&ant);
+                    ant 
+                }).collect();
             }
         }
         for ant in ants_vec.iter_mut() {
@@ -74,7 +87,13 @@ impl<'a> Colony<'a> for ACSColony<'a> {
     }
 }
 
-impl ACSColony<'_> {
+impl<'a> ACSColony<'a> {    
+    pub fn initialize_parallel(data: &'a InstanceData, parameters: &'a AcoParameters) -> Self {
+        let mut colony = ACSColony::initialize_colony(data, parameters);
+        colony.parallel = true;
+        colony
+    }
+
     fn local_pheromone_update(&mut self, ant: &ant::Ant) {
         let (i,j) = ant.get_last_arc();
         // making them local variables for convenience and readability
