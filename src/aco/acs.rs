@@ -63,6 +63,9 @@ impl<'a> Colony<'a> for ACSColony<'a> {
                 self.local_pheromone_update(ant);
             }
         }
+        for ant in ants_vec.iter_mut() {
+            ant.length += self.data.distances[ant.get_last()][ant.get_first()];
+        }
         ants_vec
     }
     

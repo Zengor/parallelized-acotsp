@@ -46,11 +46,11 @@ impl Ant {
         self.length += connection_length;
     }
 
-    fn get_first(&self) -> usize {
+    pub fn get_first(&self) -> usize {
         *self.tour.get_index(0).unwrap()
     }
 
-    fn get_last(&self) -> usize {
+    pub fn get_last(&self) -> usize {
         *self.tour.get_index(self.tour.len()-1).unwrap()
     }
 
