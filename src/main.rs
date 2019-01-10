@@ -21,7 +21,7 @@ fn print_log(results: ResultLog, out_name: &str) -> Result<()> {
     writeln!(writer, "==========================")?;
     for (i,t) in results.log.iter().enumerate() {
         writeln!(writer, "-----Iter {}, new_best: {}", i, t.is_new_best)?;
-        writeln!(writer, "length: {}", t.result.length)?;
+        writeln!(writer, "length: {} time {}s", t.result.length, t.timestamp.as_secs())?;
         writeln!(writer, "tour: {:?}", t.result.tour)?;
     }
     Ok(())
@@ -29,11 +29,13 @@ fn print_log(results: ResultLog, out_name: &str) -> Result<()> {
 
 fn main() {
     let start_time = std::time::Instant::now();
-    let input_file = "st70.tsp";
+    let input_file = "a280.tsp";
     let instance_file = read_instance_file(input_file);
-    let parameters = AcoParameters::default();
+    let mut parameters = AcoParameters::default();
+    parameters.algorithm = aco::Algorithm::MMASPar;
+    parameters.num_ants = 280;
     println!("input read, moving to execution");
     let results = run_aco(&instance_file.data, &parameters);
     println!("execution finished, writing");
-    print_log(results, &format!("{} - results.txt", input_file)).expect("failed writing log");
+    print_log(results, &format!("{} - mmas par asdf3.txt", input_file)).expect("failed writing log");
 }
