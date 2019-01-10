@@ -101,23 +101,31 @@ fn choose_best_next(curr_city: usize,
 /// Returns the index of that city.
 fn choose_probabilistically(curr_city: usize,
                             visited: &IndexSet<usize>,
-                            combined_info: &FloatMatrix) -> usize {
-    let mut unvisited = combined_info[curr_city]
+                            combined_info: &FloatMatrix,
+                            rng: &mut impl Rng) -> usize {
+    let (unvisited, weights): (Vec<usize>, Vec<f64>) = combined_info[curr_city]
         .iter()
         .enumerate()
-        .filter(|(city,_)| !visited.contains(city));
-    let unvisited_weights = unvisited.clone().map(|(_,x)| x);
-    let distribution = WeightedIndex::new(unvisited_weights).unwrap();
-    unvisited.nth(distribution.sample(&mut thread_rng())).unwrap().0 
+        .filter(|(city,_)| !visited.contains(city))
+        .unzip();
+    let mut random_v: f64 = rng.gen::<f64>() * weights.iter().sum::<f64>();
+    for (city, weight) in unvisited.iter().zip(weights) {
+        random_v -= weight;
+        if random_v < 0.0 {
+            return *city;
+        }
+    }
+    unreachable!()
 }
 
 pub fn mmas_ant(data: &InstanceData,
-                combined_info: &FloatMatrix) -> Ant {    
-    let starting_city = thread_rng().gen_range(0, data.size);
+                combined_info: &FloatMatrix) -> Ant {
+    let mut rng = thread_rng();
+    let starting_city = rng.gen_range(0, data.size);
     let mut ant = Ant::new_on_city(data.size, starting_city);
     //ant.length = 0;
     for _ in 0..data.size-1 {
-        let next_city = choose_probabilistically(ant.curr_city, &ant.tour, combined_info);
+        let next_city = choose_probabilistically(ant.curr_city, &ant.tour, combined_info, &mut rng);
         //TODO use nn_list to aid performance
         //let next_city = choose_best_next(ant.curr_city, &ant.tour, combined_info);
         ant.insert(next_city, data.distances[ant.curr_city][next_city]);
@@ -138,19 +146,20 @@ pub fn create_ants(num_ants: usize, data_size: usize) -> Vec<Ant> {
     v
 }
 
-/// A single step for an `Ant` in the ACS algorithm. `ant` is updated to be in a new city.
-pub fn acs_ant_step(ant: &mut Ant,
+/// A single step for an `Ant` in the ACS algorithm. Returns an ant that has moved a step further
+pub fn acs_ant_step(mut ant: Ant,
                     data: &InstanceData,
                     combined_info: &FloatMatrix,
-                    parameters: &AcoParameters) {    
+                    parameters: &AcoParameters) -> Ant {    
     // note: acs assumes an aplha value of 1 in all cases
-
-    let next_city = if thread_rng().gen_bool(parameters.q_0) {
+    let mut rng = thread_rng();
+    let next_city = if rng.gen_bool(parameters.q_0) {
         // get max heuristic info
         choose_best_next(ant.curr_city, &ant.tour, combined_info)
     } else {
         //get probabilistic      
-        choose_probabilistically(ant.curr_city, &ant.tour, combined_info)
+        choose_probabilistically(ant.curr_city, &ant.tour, combined_info, &mut rng)
     };
     ant.insert(next_city, data.distances[ant.curr_city][next_city]);
+    ant
 }
