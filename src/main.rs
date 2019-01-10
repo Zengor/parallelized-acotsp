@@ -28,7 +28,6 @@ fn print_log(results: ResultLog, out_name: &str) -> Result<()> {
 }
 
 fn main() {
-    let start_time = std::time::Instant::now();
     let input_file = "a280.tsp";
     let instance_file = read_instance_file(input_file);
     let mut parameters = AcoParameters::default();
@@ -37,5 +36,5 @@ fn main() {
     println!("input read, moving to execution");
     let results = run_aco(&instance_file.data, &parameters);
     println!("execution finished, writing");
-    print_log(results, &format!("{} - mmas par asdf3.txt", input_file)).expect("failed writing log");
+    print_log(results, &format!("{} - mmas par asdf4.txt", input_file)).expect("failed writing log");
 }

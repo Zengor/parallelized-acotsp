@@ -59,7 +59,7 @@ impl<'a> Colony<'a> for MMASColony<'a> {
 
     fn construct_solutions(&mut self) -> Vec<Ant> {
             //println!("new construction {}", self.iteration);
-        let range = (0..self.parameters.num_ants);
+        let range = 0..self.parameters.num_ants;
         if self.parallel {   
             range.into_par_iter().map(|_| mmas_ant(self.data, &self.combined_info)).collect()
         } else {  

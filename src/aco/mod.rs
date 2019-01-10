@@ -6,7 +6,7 @@ mod result_log;
 mod colony;
 
 use itertools::Itertools;
-use crate::util::{FloatMatrix, IntegerMatrix};
+use crate::util::{IntegerMatrix};
 use crate::instance_data::InstanceData;
 
 pub use self::aco_parameters::{AcoParameters, Algorithm};
@@ -23,7 +23,7 @@ pub fn run_aco(data: &InstanceData, parameters: &AcoParameters) -> ResultLog{
             run_colony(colony, parameters.max_iterations)
         },
         Algorithm::MMASPar => {
-            let mut colony = mmas::MMASColony::initialize_parallel(data, parameters);        
+            let colony = mmas::MMASColony::initialize_parallel(data, parameters);        
             run_colony(colony, parameters.max_iterations)
         }
         Algorithm::ACS => {

@@ -1,9 +1,6 @@
 use indexmap::IndexSet;
-use itertools::Itertools;
-use rand::{thread_rng, ThreadRng, Rng};
-use rand::distributions::{Distribution, WeightedIndex};
-use lazy_static::lazy_static;
-use crate::util::{FloatMatrix, IntegerMatrix};
+use rand::{thread_rng, Rng};
+use crate::util::{FloatMatrix};
 use crate::instance_data::InstanceData;
 use super::aco_parameters::AcoParameters;
 
