@@ -1,4 +1,4 @@
-use crate::util::{IntegerMatrix};
+use crate::util::IntegerMatrix;
 use std::str::FromStr;
 
 pub struct FileData {
@@ -11,9 +11,7 @@ pub struct InstanceData {
     pub distances: IntegerMatrix,
 }
 
-impl InstanceData {
-
-}
+impl InstanceData {}
 
 #[allow(non_camel_case_types)]
 pub enum DataDescriptionType {
@@ -31,11 +29,10 @@ impl FromStr for EdgeWeightType {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
             "EUC_2D" => Ok(EdgeWeightType::EUC_2D),
-            _ => unimplemented!()
+            _ => unimplemented!(),
         }
     }
 }
-
 
 #[derive(Default)]
 pub struct Metadata {

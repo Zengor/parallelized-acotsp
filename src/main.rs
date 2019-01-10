@@ -1,15 +1,15 @@
 mod aco;
-mod util;
 mod instance_data;
-mod tsplibreader;
 mod timer;
+mod tsplibreader;
+mod util;
 
+use crate::aco::ResultLog;
+use crate::aco::{run_aco, AcoParameters};
+use crate::tsplibreader::read_instance_file;
 use std::fs::File;
 use std::io::prelude::*;
-use std::io::{BufWriter,Result};
-use crate::aco::{AcoParameters, run_aco};
-use crate::tsplibreader::{read_instance_file};
-use crate::aco::ResultLog;
+use std::io::{BufWriter, Result};
 
 fn print_log(results: ResultLog, out_name: &str) -> Result<()> {
     let f = File::create(out_name)?;
@@ -17,11 +17,21 @@ fn print_log(results: ResultLog, out_name: &str) -> Result<()> {
     let best = results.best_timestamped();
     writeln!(writer, "BEST FOUND: {}", best.result.length)?;
     writeln!(writer, "BEST TOUR: {:?}", best.result.tour)?;
-    writeln!(writer, "Found on iteration {} at {}s", best.iteration, best.timestamp.as_secs())?;
+    writeln!(
+        writer,
+        "Found on iteration {} at {}s",
+        best.iteration,
+        best.timestamp.as_secs()
+    )?;
     writeln!(writer, "==========================")?;
-    for (i,t) in results.log.iter().enumerate() {
+    for (i, t) in results.log.iter().enumerate() {
         writeln!(writer, "-----Iter {}, new_best: {}", i, t.is_new_best)?;
-        writeln!(writer, "length: {} time {}s", t.result.length, t.timestamp.as_secs())?;
+        writeln!(
+            writer,
+            "length: {} time {}s",
+            t.result.length,
+            t.timestamp.as_secs()
+        )?;
         writeln!(writer, "tour: {:?}", t.result.tour)?;
     }
     Ok(())
@@ -36,5 +46,6 @@ fn main() {
     println!("input read, moving to execution");
     let results = run_aco(&instance_file.data, &parameters);
     println!("execution finished, writing");
-    print_log(results, &format!("{} - mmas par asdf4.txt", input_file)).expect("failed writing log");
+    print_log(results, &format!("{} - mmas par asdf4.txt", input_file))
+        .expect("failed writing log");
 }

@@ -1,19 +1,19 @@
-use std::time::Duration;
 use super::ant::Ant;
+use std::time::Duration;
 
 #[derive(Debug)]
 pub struct TimestampedResult {
     pub result: Ant,
     pub iteration: usize,
     pub timestamp: Duration,
-    pub is_new_best: bool
+    pub is_new_best: bool,
 }
 
 impl TimestampedResult {
     fn new(result: Ant, iteration: usize, is_new_best: bool) -> Self {
         TimestampedResult {
             result,
-            iteration,            
+            iteration,
             timestamp: crate::timer::elapsed(),
             is_new_best,
         }
@@ -27,7 +27,7 @@ impl TimestampedResult {
 #[derive(Debug)]
 pub struct ResultLog {
     pub log: Vec<TimestampedResult>,
-    pub best_so_far: usize,    
+    pub best_so_far: usize,
 }
 
 impl ResultLog {
@@ -39,7 +39,7 @@ impl ResultLog {
     }
 
     pub fn latest_tour<'a>(&'a self) -> &'a Ant {
-        &self.log[self.log.len()-1].result
+        &self.log[self.log.len() - 1].result
     }
 
     pub fn best_tour<'a>(&'a self) -> &'a Ant {

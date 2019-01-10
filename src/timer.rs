@@ -1,9 +1,9 @@
 use lazy_static::lazy_static;
-use std::time::{Instant, Duration};
 use std::sync::Mutex;
+use std::time::{Duration, Instant};
 
 // is this even the best way to do this??
-lazy_static!{
+lazy_static! {
     static ref TIMER: Mutex<Stopwatch> = Mutex::new(Stopwatch::new());
 }
 
@@ -18,7 +18,6 @@ impl Stopwatch {
         }
     }
 }
-
 
 pub fn restart_timer() {
     TIMER.lock().unwrap().start = Instant::now();

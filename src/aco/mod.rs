@@ -1,29 +1,29 @@
 mod aco_parameters;
-mod ant;
-mod mmas;
 mod acs;
-mod result_log;
+mod ant;
 mod colony;
+mod mmas;
+mod result_log;
 
-use itertools::Itertools;
-use crate::util::{IntegerMatrix};
 use crate::instance_data::InstanceData;
+use crate::util::IntegerMatrix;
+use itertools::Itertools;
 
 pub use self::aco_parameters::{AcoParameters, Algorithm};
 pub use self::ant::Ant;
-pub use self::result_log::{TimestampedResult, ResultLog};
 use self::colony::Colony;
+pub use self::result_log::{ResultLog, TimestampedResult};
 
-pub fn run_aco(data: &InstanceData, parameters: &AcoParameters) -> ResultLog{
+pub fn run_aco(data: &InstanceData, parameters: &AcoParameters) -> ResultLog {
     let algorithm = &parameters.algorithm;
 
     match *algorithm {
         Algorithm::MMAS => {
             let colony = mmas::MMASColony::initialize_colony(data, parameters);
             run_colony(colony, parameters.max_iterations)
-        },
+        }
         Algorithm::MMASPar => {
-            let colony = mmas::MMASColony::initialize_parallel(data, parameters);        
+            let colony = mmas::MMASColony::initialize_parallel(data, parameters);
             run_colony(colony, parameters.max_iterations)
         }
         Algorithm::ACS => {
@@ -52,18 +52,15 @@ fn check_termination<'a>(colony: &impl Colony<'a>, max_iterations: usize) -> boo
     colony.iteration() > max_iterations
 }
 
-fn generate_nn_list(data: &InstanceData) -> Vec<Vec<u32>>{
+fn generate_nn_list(data: &InstanceData) -> Vec<Vec<u32>> {
     let mut nn_list = Vec::with_capacity(data.size);
     for i in 0..data.size {
-        let mut sorted = data.distances[i].iter()
-                                        .map(|x| x.to_owned())
-                                        .sorted();
+        let mut sorted = data.distances[i].iter().map(|x| x.to_owned()).sorted();
         sorted.pop();
         nn_list.push(sorted);
     }
     nn_list
 }
-
 
 fn update_stats(iter_results: &[Ant], result_log: &mut ResultLog, iteration: usize) {
     let best_this_iter = find_best(iter_results);
@@ -74,10 +71,7 @@ fn find_best<'a>(results: &'a [Ant]) -> &'a Ant {
     results.iter().min_by_key(|x| x.length).unwrap()
 }
 
-pub fn total_value(pheromone: f64,
-                   heuristic: f64,
-                   alpha: f64,
-                   beta: f64) -> f64 {
+pub fn total_value(pheromone: f64, heuristic: f64, alpha: f64, beta: f64) -> f64 {
     pheromone.powf(alpha) * heuristic.powf(beta)
 }
 
