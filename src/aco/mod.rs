@@ -20,26 +20,26 @@ pub fn run_aco(data: &InstanceData, parameters: &AcoParameters) -> ResultLog {
     match *algorithm {
         Algorithm::MMAS => {
             let colony = mmas::MMASColony::initialize_colony(data, parameters);
-            run_colony(colony, parameters.max_iterations)
+            run_colony(colony, parameters.max_iterations, parameters.time_limit)
         }
         Algorithm::MMASPar => {
             let colony = mmas::MMASColony::initialize_parallel(data, parameters);
-            run_colony(colony, parameters.max_iterations)
+            run_colony(colony, parameters.max_iterations, parameters.time_limit)
         }
         Algorithm::ACS => {
             let colony = acs::ACSColony::initialize_colony(data, parameters);
-            run_colony(colony, parameters.max_iterations)
+            run_colony(colony, parameters.max_iterations, parameters.time_limit)
         }
         Algorithm::ACSParMasterUpdate => {
             let colony = acs::ACSColony::initialize_parallel(data, parameters);
-            run_colony(colony, parameters.max_iterations)
+            run_colony(colony, parameters.max_iterations, parameters.time_limit)
         }
     }
 }
 
-fn run_colony<'a>(mut colony: impl Colony<'a>, max_iterations: usize) -> ResultLog {
+fn run_colony<'a>(mut colony: impl Colony<'a>, max_iterations: usize, max_time: usize) -> ResultLog {
     let mut result_log = ResultLog::new(max_iterations);
-    while !check_termination(&colony, max_iterations) {
+    while !check_termination(&colony, max_iterations, max_time) {
         colony.new_iteration();
         let results = colony.construct_solutions();
         update_stats(&results, &mut result_log, colony.iteration());
@@ -48,18 +48,8 @@ fn run_colony<'a>(mut colony: impl Colony<'a>, max_iterations: usize) -> ResultL
     result_log
 }
 
-fn check_termination<'a>(colony: &impl Colony<'a>, max_iterations: usize) -> bool {
-    colony.iteration() > max_iterations
-}
-
-fn generate_nn_list(data: &InstanceData) -> Vec<Vec<u32>> {
-    let mut nn_list = Vec::with_capacity(data.size);
-    for i in 0..data.size {
-        let mut sorted = data.distances[i].iter().map(|x| x.to_owned()).sorted();
-        sorted.pop();
-        nn_list.push(sorted);
-    }
-    nn_list
+fn check_termination<'a>(colony: &impl Colony<'a>, max_iterations: usize, max_time: usize) -> bool {
+    colony.iteration() > max_iterations || crate::timer::elapsed().as_secs() >= max_time as u64
 }
 
 fn update_stats(iter_results: &[Ant], result_log: &mut ResultLog, iteration: usize) {
