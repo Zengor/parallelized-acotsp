@@ -5,13 +5,14 @@ use crate::aco::AcoParameters;
 #[derive(Deserialize)]
 pub struct RunDescription {
     #[serde(default = "default_num_runs")]
-    num_runs: usize,
-    data_file: String,
-    parameters: AcoParameters,
+    pub num_runs: usize,
+    pub data_file: String,
+    pub out_path: String,
+    pub parameters: AcoParameters,
 }
 
-pub read_run_file(f_name: &str) -> Vec<RunDescription> {
-    let contents = read_to_string(f_name).expect("could not read parameter file");
+pub fn read_run_file(f_name: &str) -> Vec<RunDescription> {
+    let contents = read_to_string(f_name).expect("could not read run file");
     serde_json::from_str(&contents).expect("Could not convert paremeters from JSON")
 }
 
