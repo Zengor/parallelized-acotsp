@@ -27,9 +27,11 @@ pub struct MMASColony<'a> {
 impl<'a> Colony<'a> for MMASColony<'a> {
     fn initialize_colony(data: &'a InstanceData, parameters: &'a AcoParameters) -> MMASColony<'a> {
         let nn_tour_length = ant::nearest_neighbour_tour(data, 0);
-        let (trail_min, trail_max) = calculate_bounding_values(nn_tour_length, data.size, parameters.evaporation_rate);
+        let (trail_min, trail_max) =
+            calculate_bounding_values(nn_tour_length, data.size, parameters.evaporation_rate);
         let pheromones = util::generate_pheromone_matrix(data.size, trail_max);
-        let (heuristic_info, combined_info) = compute_combined_info(&data.distances, &pheromones, parameters);
+        let (heuristic_info, combined_info) =
+            compute_combined_info(&data.distances, &pheromones, parameters);
 
         Self {
             iteration: 0,
