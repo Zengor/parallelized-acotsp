@@ -1,0 +1,30 @@
+[ 
+    {
+        "num_runs": 1,
+        "data_file": "rat783.tsp",
+        "out_path": "results/mmas_par/rat783",
+        "parameters": {
+            "num_ants": 783,
+            "alpha": 1.0,
+            "beta": 5.0,
+            "evaporation_rate": 0.02,
+            "algorithm": "MMASPar",
+            "max_iterations": 100000,
+            "time_limit": 100
+        }
+    },
+    {
+        "num_runs": 1,
+        "data_file": "rat783.tsp",
+        "out_path": "results/mmas/rat783",
+        "parameters": {
+            "num_ants": 783,
+            "alpha": 1.0,
+            "beta": 5.0,
+            "evaporation_rate": 0.02,
+            "algorithm": "MMAS",
+            "max_iterations": 100000,
+            "time_limit": 100
+        }
+    }
+]
