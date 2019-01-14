@@ -1,3 +1,5 @@
+use itertools::Itertools;
+
 use super::ant::Ant;
 use super::AcoParameters;
 use crate::instance_data::InstanceData;
@@ -54,4 +56,19 @@ pub fn recompute_combined_info(
             combined_info[j][i] = combined_info[i][j];
         }
     }
+}
+
+fn generate_nn_list(data: &InstanceData, list_size: usize) -> Vec<Vec<usize>> {
+    let mut nn_list = Vec::with_capacity(data.size);
+    for i in 0..data.size {
+        let sorted = data.distances[i]
+            .iter()
+            .enumerate()
+            .sorted_by_key(|(_, &d)| d)
+            .take(list_size)
+            .map(|(c, _)| c)
+            .collect();
+        nn_list.push(sorted);
+    }
+    nn_list
 }
