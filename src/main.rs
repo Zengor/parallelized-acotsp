@@ -1,17 +1,18 @@
 mod aco;
 mod instance_data;
+mod parameters_reader;
 mod timer;
 mod tsplibreader;
 mod util;
-mod parameters_reader;
 
+use crate::aco::run_aco;
 use crate::aco::ResultLog;
-use crate::aco::{run_aco, AcoParameters};
 use crate::tsplibreader::read_instance_file;
-use std::path::PathBuf;
+use clap::{App, Arg};
 use std::fs::File;
 use std::io::prelude::*;
 use std::io::{BufWriter, Result};
+use std::path::PathBuf;
 
 fn print_log(results: ResultLog, out_path: &str, file_name: &str) -> Result<()> {
     std::fs::create_dir_all(out_path).expect("failed at creating path");
@@ -20,7 +21,15 @@ fn print_log(results: ResultLog, out_path: &str, file_name: &str) -> Result<()> 
     let mut writer = BufWriter::new(f);
     let best = results.best_timestamped();
     writeln!(writer, "BEST FOUND: {}", best.result.length)?;
-    writeln!(writer, "BEST TOUR: {:?}", best.result.tour.iter().map(|i| i+1).collect::<Vec<usize>>())?;
+    writeln!(
+        writer,
+        "BEST TOUR: {:?}",
+        best.result
+            .tour
+            .iter()
+            .map(|i| i + 1)
+            .collect::<Vec<usize>>()
+    )?;
     writeln!(
         writer,
         "Found on iteration {} at {}s",
@@ -29,14 +38,18 @@ fn print_log(results: ResultLog, out_path: &str, file_name: &str) -> Result<()> 
     )?;
     writeln!(writer, "==========================")?;
     for (i, t) in results.log.iter().enumerate() {
-        writeln!(writer, "-----Iter {}, new_best: {}", i+1, t.is_new_best)?;
+        writeln!(writer, "-----Iter {}, new_best: {}", i + 1, t.is_new_best)?;
         writeln!(
             writer,
             "length: {} time {}s",
             t.result.length,
             t.timestamp.as_secs()
         )?;
-        writeln!(writer, "tour: {:?}", t.result.tour.iter().map(|i| i+1).collect::<Vec<usize>>())?;
+        writeln!(
+            writer,
+            "tour: {:?}",
+            t.result.tour.iter().map(|i| i + 1).collect::<Vec<usize>>()
+        )?;
     }
     Ok(())
 }
@@ -45,7 +58,18 @@ fn main() {
     //let input_file = "a280.tsp";
     //let instance_file = read_instance_file(input_file);
     //let mut parameters = AcoParameters::default();
-    let run_descriptions = crate::parameters_reader::read_run_file("mmasrun.json");
+    let matches = App::new("Parallelized ACOTSP")
+                            .version("0.1")
+                            .author("Iago Almeida <ialmeida@edu.unifor.br>")
+                            .about("Single core and Multicore implementations of MMAS and ACS metaheuristics for the TSP")
+                            .arg(Arg::with_name("RUN DESCRIPTION FILE")
+                                    .help("JSON file with the description of input files, parameters, number of runs, and algorithms to run")
+                                    .required(true))
+                            .get_matches();
+    let run_file_name = matches
+        .value_of("RUN DESCRIPTION FILE")
+        .expect("failed parsing argument");
+    let run_descriptions = crate::parameters_reader::read_run_file(&run_file_name);
     for description in run_descriptions {
         println!("STARTING NEW RUN");
         println!("reading input file {}", &description.data_file);
@@ -53,13 +77,16 @@ fn main() {
         let instance_file = read_instance_file(&description.data_file);
         println!("read input in {}s", timer::elapsed().as_secs());
         println!("---- starting runs");
-        for run in 1..=description.num_runs {            
+        for run in 1..=description.num_runs {
             println!("run {} of {}", run, description.num_runs);
             timer::restart_timer();
             let results = run_aco(&instance_file.data, &description.parameters);
             println!("total elapsed time {}s", timer::elapsed().as_secs());
             let out_file = format!("{}_{}.txt", description.out_path.replace('/', "_"), run);
-            println!("printing results to {}/{}", &description.out_path, &out_file);
+            println!(
+                "printing results to {}/{}",
+                &description.out_path, &out_file
+            );
             print_log(results, &description.out_path, &out_file).expect("failed writing log file");
             println!("-----")
         }

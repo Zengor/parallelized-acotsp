@@ -1,6 +1,6 @@
+use crate::aco::AcoParameters;
 use serde_derive::Deserialize;
 use std::fs::read_to_string;
-use crate::aco::AcoParameters;
 
 #[derive(Deserialize)]
 pub struct RunDescription {
@@ -16,4 +16,6 @@ pub fn read_run_file(f_name: &str) -> Vec<RunDescription> {
     serde_json::from_str(&contents).expect("Could not convert paremeters from JSON")
 }
 
-fn default_num_runs() -> usize { 1 }
+fn default_num_runs() -> usize {
+    1
+}

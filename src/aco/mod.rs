@@ -37,7 +37,11 @@ pub fn run_aco(data: &InstanceData, parameters: &AcoParameters) -> ResultLog {
     }
 }
 
-fn run_colony<'a>(mut colony: impl Colony<'a>, max_iterations: usize, max_time: usize) -> ResultLog {
+fn run_colony<'a>(
+    mut colony: impl Colony<'a>,
+    max_iterations: usize,
+    max_time: usize,
+) -> ResultLog {
     let mut result_log = ResultLog::new(max_iterations);
     while !check_termination(&colony, max_iterations, max_time) {
         colony.new_iteration();
