@@ -45,16 +45,16 @@ impl Ant {
     }
 
     pub fn get_first(&self) -> usize {
-        *self.tour.get_index(0).unwrap()
+        *self.tour.get_index(0).expect("get first")
     }
 
     pub fn get_last(&self) -> usize {
-        *self.tour.get_index(self.tour.len() - 1).unwrap()
+        *self.tour.get_index(self.tour.len() - 1).expect("get_last")
     }
 
     pub fn get_last_arc(&self) -> (usize, usize) {
         (
-            *self.tour.get_index(self.tour.len() - 2).unwrap(),
+            *self.tour.get_index(self.tour.len() - 2).expect("last arc"),
             self.get_last(),
         )
     }
@@ -182,8 +182,6 @@ pub fn acs_ant_step_sync(
     // which could be perhaps avoided with some refactoring and using some new traits.
     // it includes a complete repeat of the choose_best_next and choose_probabilistically function
     // except that they're now accounting for the fact that combined_info holds Arc<RwLocks> which must be handled.
-    // one major problem is that RwLock isn't Copy, so you can't use Iterator's unzip(),
-    // which was used in choose_probabilistically to make things simpler.
 
     let mut rng = thread_rng();
     let next_city = if rng.gen_bool(parameters.q_0) {
@@ -193,23 +191,25 @@ pub fn acs_ant_step_sync(
             .iter()
             .enumerate()
             .filter(|(city, _)| !ant.tour.contains(city))
-            .max_by(|(_, a), (_, b)| (*a.read()).partial_cmp(&*b.read()).unwrap())
-            .unwrap();
+            .max_by(|(_, a), (_, b)| (*a.read()).partial_cmp(&*b.read()).expect("failed comparison"))
+            .expect("failed max_by");
         next_city
     } else {
         //get probabilistic
         //choose_probabilistically(ant.curr_city, &ant.tour, combined_info, &mut rng)
         let mut next_city = 0;
-        let unvisited = combined_info[ant.curr_city]
+        let (unvisited, weights): (Vec<usize>, Vec<f64>) = combined_info[ant.curr_city]
             .iter()
             .enumerate()
-            .filter(|(city, _)| !ant.tour.contains(city));
-        let sum = unvisited.clone().fold(0.0, |acc, (_, v)| acc + *v.read());
-        let mut random_v: f64 = rng.gen::<f64>() * sum;
-        for (city, weight) in unvisited {
-            random_v -= *weight.read();
+            .filter(|(city, _)| !ant.tour.contains(city))
+            .map(|(c,w)| (c, *w.read()))
+            .unzip();
+        let mut random_v: f64 = rng.gen::<f64>() * weights.iter().sum::<f64>();
+        for (city, weight) in unvisited.iter().zip(weights) {
+            random_v -= weight;
             if random_v < 0.0 {
-                next_city = city;
+                next_city = *city;
+                break;
             }
         }
         next_city

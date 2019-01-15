@@ -1,6 +1,6 @@
 use itertools::Itertools;
 use rayon::prelude::*;
-
+use parking_lot::{Mutex};
 use crate::instance_data::InstanceData;
 use crate::util::{self, FloatMatrix, FloatMatrixSync};
 
@@ -14,6 +14,7 @@ use std::sync::Arc;
 pub struct ACSPar<'a> {
     iteration: usize,
     data: &'a InstanceData,
+    lock_mutex: Arc<Mutex<()>>,
     pheromones: FloatMatrixSync,
     /// Heuristic information based on the distance, calculated on initialization
     heuristic_info: FloatMatrix,
@@ -36,6 +37,7 @@ impl<'a> Colony<'a> for ACSPar<'a> {
         Self {
             iteration: 0,
             data,
+            lock_mutex: Arc::new(Mutex::new(())),
             pheromones,
             heuristic_info,
             combined_info,
@@ -66,18 +68,18 @@ impl<'a> Colony<'a> for ACSPar<'a> {
                         (
                             Arc::clone(&self.pheromones),
                             Arc::clone(&self.combined_info),
+                            Arc::clone(&self.lock_mutex),
                         )
                     },
-                    |(pheromones, combined_info), ant| {
-                        let ant = {
-                            ant::acs_ant_step_sync(
+                    |(pheromones, combined_info, mutex), ant| {
+                        let ant = ant::acs_ant_step_sync(
                                 ant,
                                 self.data,
                                 &self.combined_info,
                                 self.parameters,
-                            )
-                        };
+                            );
                         local_pheromone_update(
+                            mutex,
                             pheromones,
                             &self.heuristic_info,
                             combined_info,
@@ -105,7 +107,8 @@ impl<'a> Colony<'a> for ACSPar<'a> {
         );
         let coefficient = 1.0 - evap_rate;
         for (&i, &j) in best_so_far.tour.iter().tuple_windows() {
-            // this method is always run on the main thread, there's no need to worry about how long we hold the locks
+            // this method is always run on the main thread, there's no need to worry 
+            // about using the mutex to get the locks
             let mut comb_ij = self.combined_info[i][j].write();
             let mut comb_ji = self.combined_info[j][i].write();
             let mut pherom_ij = self.pheromones[i][j].write();
@@ -113,7 +116,7 @@ impl<'a> Colony<'a> for ACSPar<'a> {
             *pherom_ij = coefficient * *pherom_ij + evap_rate * d_tau;
             *pherom_ji = *pherom_ij;
             *comb_ij = super::total_value(
-                *self.pheromones[i][j].read(),
+                *pherom_ij,
                 self.heuristic_info[i][j],
                 alpha,
                 beta,
@@ -128,31 +131,30 @@ fn calculate_initial_values(nn_tour_length: u32, num_nodes: usize) -> f64 {
 }
 
 fn local_pheromone_update(
+    mutex: &mut Arc<Mutex<()>>,
     pheromones: &mut FloatMatrixSync,
     heuristic_info: &FloatMatrix,
     combined_info: &mut FloatMatrixSync,
     parameters: &AcoParameters,
     initial_trail: f64,
     ant: &Ant,
-) {
+) { 
     let (i, j) = ant.get_last_arc();
     // making them local variables for convenience and readability
     let (alpha, beta, xi) = (parameters.alpha, parameters.beta, parameters.xi);
-    // grabbing locks for the combined info early to avoid another thread updating them before we're done
-    // with calculating the value that we'll modify
-    let mut comb_ij = combined_info[i][j].write();
-    let mut comb_ji = combined_info[j][i].write();
-    {
-        // grabbing the pheromone locks in an inner scope so we can free it as soon as we're done,
-        // so another thread needing to just read it can keep going
-        let mut pherom_ij = pheromones[i][j].write();
-        let mut pherom_ji = pheromones[j][i].write();
-        // calculating new pheromone value
-        let modified_old_pherom = (1.0 - xi) * *pherom_ij;
-        let added_pherom = xi * initial_trail;
-        *pherom_ij = modified_old_pherom + added_pherom;
-        *pherom_ji = *pherom_ij;
-    }
-    *comb_ij = super::total_value(*pheromones[i][j].read(), heuristic_info[i][j], alpha, beta);
-    *comb_ji = *comb_ij;
+    let (mut comb_ij, mut comb_ji, mut pherom_ij, mut pherom_ji) = {  
+        // this mutex lock is necessary because we might have two threads going for (i,j) and (j,i) separetely      
+        let _lock = mutex.lock();
+        let comb_ij = combined_info[i][j].write();
+        let comb_ji = combined_info[j][i].write();
+        let pherom_ij = pheromones[i][j].write();
+        let pherom_ji = pheromones[j][i].write();
+        (comb_ij, comb_ji, pherom_ij, pherom_ji)
+    };
+    let modified_old_pherom = (1.0 - xi) * *pherom_ij;
+    let added_pherom = xi * initial_trail;
+    *pherom_ij = modified_old_pherom + added_pherom;
+    *pherom_ji = *pherom_ij;
+    *comb_ij = super::total_value(*pherom_ij, heuristic_info[i][j], alpha, beta);
+    *comb_ji = *comb_ij;    
 }

@@ -66,6 +66,7 @@ fn main() {
                                     .help("JSON file with the description of input files, parameters, number of runs, and algorithms to run")
                                     .required(true))
                             .get_matches();
+    
     let run_file_name = matches
         .value_of("RUN DESCRIPTION FILE")
         .expect("failed parsing argument");
