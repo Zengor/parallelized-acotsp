@@ -55,9 +55,9 @@ fn read_node_coord_section(
         nodes.push((split[1].parse().unwrap(), split[2].parse().unwrap()));
     }
     let mut distances: crate::util::IntegerMatrix = Vec::with_capacity(size);
-    for &i in nodes.iter() {
+    for (i,&node_i) in nodes.iter().enumerate() {
         let mut distances_from_this_node: Vec<u32> = Vec::with_capacity(size);
-        for &j in nodes.iter() {
+        for (j,&node_j) in nodes.iter().enumerate() {
             if i == j {
                 distances_from_this_node.push(std::u32::MAX);
                 continue;
@@ -67,7 +67,7 @@ fn read_node_coord_section(
                 .as_ref()
                 .expect("No defined edge_weight_type")
             {
-                EUC_2D => distances_from_this_node.push(distance_funcs::euc_2d(i, j)),
+                EUC_2D => distances_from_this_node.push(distance_funcs::euc_2d(node_i, node_j)),
                 _ => unimplemented!(),
             }
         }
