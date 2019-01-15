@@ -1,5 +1,9 @@
+use parking_lot::RwLock;
+use std::sync::Arc;
+
 pub type FloatMatrix = Vec<Vec<f64>>;
 pub type IntegerMatrix = Vec<Vec<u32>>;
+pub type FloatMatrixSync = Arc<Vec<Vec<Arc<RwLock<f64>>>>>;
 
 pub fn generate_pheromone_matrix(size: usize, value: f64) -> FloatMatrix {
     let mut matrix = generate_filled_matrix(size, value);
@@ -17,6 +21,18 @@ pub fn generate_filled_matrix<T: Copy>(size: usize, element: T) -> Vec<Vec<T>> {
     out
 }
 
+pub fn convert_to_sync(matrix: FloatMatrix) -> FloatMatrixSync {
+    let mut outer = Vec::with_capacity(matrix.len());
+    for inner in matrix.into_iter() {
+        outer.push(
+            inner
+                .into_iter()
+                .map(|x| Arc::new(RwLock::new(x)))
+                .collect(),
+        );
+    }
+    Arc::new(outer)
+}
 /// Calculates the value of a single tour (assumes first node is 0), used while testing, left in just in case.
 #[allow(dead_code)]
 pub fn value_of_tour(distances: &IntegerMatrix, tour: &[usize]) -> u32 {

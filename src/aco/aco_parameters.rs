@@ -1,11 +1,12 @@
 use serde_derive::Deserialize;
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 pub enum Algorithm {
     MMAS,
     MMASPar,
     ACS,
     ACSParMasterUpdate,
+    ACSParSync,
 }
 
 impl Default for Algorithm {
@@ -79,7 +80,7 @@ fn default_xi() -> f64 {
     0.1
 }
 fn default_max_iterations() -> usize {
-    1000
+    std::usize::MAX
 }
 fn default_time_limit() -> usize {
     std::usize::MAX

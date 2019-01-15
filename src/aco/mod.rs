@@ -1,5 +1,6 @@
 mod aco_parameters;
 mod acs;
+mod acspar;
 mod ant;
 mod colony;
 mod mmas;
@@ -7,7 +8,6 @@ mod result_log;
 
 use crate::instance_data::InstanceData;
 use crate::util::IntegerMatrix;
-use itertools::Itertools;
 
 pub use self::aco_parameters::{AcoParameters, Algorithm};
 pub use self::ant::Ant;
@@ -32,6 +32,10 @@ pub fn run_aco(data: &InstanceData, parameters: &AcoParameters) -> ResultLog {
         }
         Algorithm::ACSParMasterUpdate => {
             let colony = acs::ACSColony::initialize_parallel(data, parameters);
+            run_colony(colony, parameters.max_iterations, parameters.time_limit)
+        }
+        Algorithm::ACSParSync => {
+            let colony = acspar::ACSPar::initialize_colony(data, parameters);
             run_colony(colony, parameters.max_iterations, parameters.time_limit)
         }
     }

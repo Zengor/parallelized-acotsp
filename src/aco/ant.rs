@@ -1,6 +1,6 @@
 use super::aco_parameters::AcoParameters;
 use crate::instance_data::InstanceData;
-use crate::util::FloatMatrix;
+use crate::util::{FloatMatrix, FloatMatrixSync};
 use indexmap::IndexSet;
 use rand::{thread_rng, Rng};
 
@@ -38,6 +38,7 @@ impl Ant {
     // }
 
     fn insert(&mut self, new_node: usize, connection_length: u32) {
+        //println!("{},{}: {} + {}", self.curr_city, new_node, self.length, connection_length );
         self.curr_city = new_node;
         self.tour.insert(new_node);
         self.length += connection_length;
@@ -165,6 +166,53 @@ pub fn acs_ant_step(
     } else {
         //get probabilistic
         choose_probabilistically(ant.curr_city, &ant.tour, combined_info, &mut rng)
+    };
+    ant.insert(next_city, data.distances[ant.curr_city][next_city]);
+    ant
+}
+
+/// A single step for an `Ant` in the ACS algorithm using sync primitives. Returns an ant that has moved a step further.
+pub fn acs_ant_step_sync(
+    mut ant: Ant,
+    data: &InstanceData,
+    combined_info: &FloatMatrixSync,
+    parameters: &AcoParameters,
+) -> Ant {
+    // this code is very verbose and repeats code done by other functions,
+    // which could be perhaps avoided with some refactoring and using some new traits.
+    // it includes a complete repeat of the choose_best_next and choose_probabilistically function
+    // except that they're now accounting for the fact that combined_info holds Arc<RwLocks> which must be handled.
+    // one major problem is that RwLock isn't Copy, so you can't use Iterator's unzip(),
+    // which was used in choose_probabilistically to make things simpler.
+
+    let mut rng = thread_rng();
+    let next_city = if rng.gen_bool(parameters.q_0) {
+        // get max heuristic info
+        //choose_best_next(ant.curr_city, &ant.tour, combined_info)
+        let (next_city, _) = combined_info[ant.curr_city]
+            .iter()
+            .enumerate()
+            .filter(|(city, _)| !ant.tour.contains(city))
+            .max_by(|(_, a), (_, b)| (*a.read()).partial_cmp(&*b.read()).unwrap())
+            .unwrap();
+        next_city
+    } else {
+        //get probabilistic
+        //choose_probabilistically(ant.curr_city, &ant.tour, combined_info, &mut rng)
+        let mut next_city = 0;
+        let unvisited = combined_info[ant.curr_city]
+            .iter()
+            .enumerate()
+            .filter(|(city, _)| !ant.tour.contains(city));
+        let sum = unvisited.clone().fold(0.0, |acc, (_, v)| acc + *v.read());
+        let mut random_v: f64 = rng.gen::<f64>() * sum;
+        for (city, weight) in unvisited {
+            random_v -= *weight.read();
+            if random_v < 0.0 {
+                next_city = city;
+            }
+        }
+        next_city
     };
     ant.insert(next_city, data.distances[ant.curr_city][next_city]);
     ant

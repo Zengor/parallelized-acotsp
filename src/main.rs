@@ -71,7 +71,7 @@ fn main() {
         .expect("failed parsing argument");
     let run_descriptions = crate::parameters_reader::read_run_file(&run_file_name);
     for description in run_descriptions {
-        println!("STARTING NEW RUN");
+        println!("STARTING NEW RUN of {:?}", description.parameters.algorithm);
         println!("reading input file {}", &description.data_file);
         timer::restart_timer();
         let instance_file = read_instance_file(&description.data_file);
@@ -82,7 +82,12 @@ fn main() {
             timer::restart_timer();
             let results = run_aco(&instance_file.data, &description.parameters);
             println!("total elapsed time {}s", timer::elapsed().as_secs());
-            let out_file = format!("{}_{}.txt", description.out_path.replace('/', "_"), run);
+            let out_file = format!(
+                "{}_{:?}_{}.txt",
+                description.out_path.replace('/', "_"),
+                description.parameters.algorithm,
+                run
+            );
             println!(
                 "printing results to {}/{}",
                 &description.out_path, &out_file

@@ -88,13 +88,24 @@ impl<'a> Colony<'a> for ACSColony<'a> {
     }
 
     fn update_pheromones(&mut self, _: &Ant, best_so_far: &Ant) {
-        global_update_pheromones(
-            &mut self.pheromones,
-            &mut self.heuristic_info,
-            &mut self.combined_info,
-            self.parameters,
-            best_so_far,
+        let d_tau = 1.0 / best_so_far.length as f64;
+        let (alpha, beta, evap_rate) = (
+            self.parameters.alpha,
+            self.parameters.beta,
+            self.parameters.evaporation_rate,
         );
+        let coefficient = 1.0 - evap_rate;
+        for (&i, &j) in best_so_far.tour.iter().tuple_windows() {
+            self.pheromones[i][j] = coefficient * self.pheromones[i][j] + evap_rate * d_tau;
+            self.pheromones[j][i] = self.pheromones[i][j];
+            self.combined_info[i][j] = super::total_value(
+                self.pheromones[i][j],
+                self.heuristic_info[i][j],
+                alpha,
+                beta,
+            );
+            self.combined_info[j][i] = self.combined_info[i][j];
+        }
     }
 }
 
@@ -131,26 +142,4 @@ impl<'a> ACSColony<'a> {
 
 fn calculate_initial_values(nn_tour_length: u32, num_nodes: usize) -> f64 {
     1.0 / (num_nodes * nn_tour_length as usize) as f64
-}
-
-fn global_update_pheromones(
-    pheromones: &mut FloatMatrix,
-    heuristic_info: &mut FloatMatrix,
-    combined_info: &mut FloatMatrix,
-    parameters: &AcoParameters,
-    best_so_far: &Ant,
-) {
-    let d_tau = 1.0 / best_so_far.length as f64;
-    let coefficient = 1.0 - parameters.evaporation_rate;
-    for (&i, &j) in best_so_far.tour.iter().tuple_windows() {
-        pheromones[i][j] = coefficient * pheromones[i][j] + parameters.evaporation_rate * d_tau;
-        pheromones[j][i] = pheromones[i][j];
-        combined_info[i][j] = super::total_value(
-            pheromones[i][j],
-            heuristic_info[i][j],
-            parameters.alpha,
-            parameters.beta,
-        );
-        combined_info[j][i] = combined_info[i][j];
-    }
 }
