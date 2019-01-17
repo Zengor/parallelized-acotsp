@@ -80,7 +80,7 @@ fn default_xi() -> f64 {
     0.1
 }
 fn default_max_iterations() -> usize {
-    std::usize::MAX
+    100000000
 }
 fn default_time_limit() -> usize {
     std::usize::MAX
