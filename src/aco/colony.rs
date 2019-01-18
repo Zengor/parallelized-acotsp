@@ -9,7 +9,7 @@ pub trait Colony<'a> {
     fn initialize_colony(data: &'a InstanceData, parameters: &'a AcoParameters) -> Self;
     fn new_iteration(&mut self);
     fn iteration(&self) -> usize;
-    fn construct_solutions(&mut self) -> Vec<Ant>;
+    fn construct_solutions(&mut self) -> Ant;
     fn update_pheromones(&mut self, best_this_iter: &Ant, best_so_far: &Ant);
 }
 

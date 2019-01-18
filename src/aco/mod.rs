@@ -49,8 +49,8 @@ fn run_colony<'a>(
     let mut result_log = ResultLog::new(max_iterations);
     while !check_termination(&colony, max_iterations, max_time) {
         colony.new_iteration();
-        let results = colony.construct_solutions();
-        update_stats(&results, &mut result_log, colony.iteration());
+        let result = colony.construct_solutions();
+        update_stats(result, &mut result_log, colony.iteration());
         colony.update_pheromones(result_log.latest_tour(), result_log.best_tour());
     }
     result_log
@@ -60,11 +60,12 @@ fn check_termination<'a>(colony: &impl Colony<'a>, max_iterations: usize, max_ti
     colony.iteration() > max_iterations || crate::timer::elapsed().as_secs() >= max_time as u64
 }
 
-fn update_stats(iter_results: &[Ant], result_log: &mut ResultLog, iteration: usize) {
-    let best_this_iter = find_best(iter_results);
+fn update_stats(best_this_iter: Ant, result_log: &mut ResultLog, iteration: usize) {
+    //let best_this_iter = find_best(iter_results);
     result_log.push(best_this_iter.to_owned(), iteration);
 }
 
+#[allow(dead_code)]
 fn find_best<'a>(results: &'a [Ant]) -> &'a Ant {
     results.iter().min_by_key(|x| x.length).unwrap()
 }

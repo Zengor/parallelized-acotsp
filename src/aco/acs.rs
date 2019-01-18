@@ -52,7 +52,7 @@ impl<'a> Colony<'a> for ACSColony<'a> {
         self.iteration
     }
 
-    fn construct_solutions(&mut self) -> Vec<Ant> {
+    fn construct_solutions(&mut self) -> Ant {
         let n_ants = self.parameters.num_ants;
         let data_size = self.data.size;
         let mut ants_vec = ant::create_ants(n_ants, data_size);
@@ -84,7 +84,7 @@ impl<'a> Colony<'a> for ACSColony<'a> {
         for ant in ants_vec.iter_mut() {
             ant.length += self.data.distances[ant.get_last()][ant.get_first()];
         }
-        ants_vec
+        ants_vec.into_iter().min_by_key(|a| a.length).unwrap()
     }
 
     fn update_pheromones(&mut self, _: &Ant, best_so_far: &Ant) {

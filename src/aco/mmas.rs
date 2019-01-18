@@ -55,19 +55,19 @@ impl<'a> Colony<'a> for MMASColony<'a> {
         self.iteration
     }
 
-    fn construct_solutions(&mut self) -> Vec<Ant> {
+    fn construct_solutions(&mut self) -> Ant {
         //println!("new construction {}", self.iteration);
         let range = 0..self.parameters.num_ants;
         if self.parallel {
             range
                 .into_par_iter()
                 .map(|_| mmas_ant(self.data, &self.combined_info))
-                .collect()
+                .min_by_key(|a| a.length).unwrap()
         } else {
             range
                 .into_iter()
                 .map(|_| mmas_ant(self.data, &self.combined_info))
-                .collect()
+                .min_by_key(|a| a.length).unwrap()
         }
     }
 
