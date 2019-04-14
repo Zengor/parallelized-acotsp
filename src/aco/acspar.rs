@@ -1,8 +1,8 @@
-use itertools::Itertools;
-use rayon::prelude::*;
-use parking_lot::{Mutex};
 use crate::instance_data::InstanceData;
 use crate::util::{self, FloatMatrix, FloatMatrixSync};
+use itertools::Itertools;
+use parking_lot::Mutex;
+use rayon::prelude::*;
 
 use super::ant;
 use super::colony::{compute_combined_info, Colony};
@@ -73,11 +73,11 @@ impl<'a> Colony<'a> for ACSPar<'a> {
                     },
                     |(pheromones, combined_info, mutex), ant| {
                         let ant = ant::acs_ant_step_sync(
-                                ant,
-                                self.data,
-                                &self.combined_info,
-                                self.parameters,
-                            );
+                            ant,
+                            self.data,
+                            &self.combined_info,
+                            self.parameters,
+                        );
                         local_pheromone_update(
                             mutex,
                             pheromones,
@@ -107,7 +107,7 @@ impl<'a> Colony<'a> for ACSPar<'a> {
         );
         let coefficient = 1.0 - evap_rate;
         for (&i, &j) in best_so_far.tour.iter().tuple_windows() {
-            // this method is always run on the main thread, there's no need to worry 
+            // this method is always run on the main thread, there's no need to worry
             // about avoiding deadlocks by using the mutex before getting the locks
             let mut comb_ij = self.combined_info[i][j].write();
             let mut comb_ji = self.combined_info[j][i].write();
@@ -115,12 +115,7 @@ impl<'a> Colony<'a> for ACSPar<'a> {
             let mut pherom_ji = self.pheromones[j][i].write();
             *pherom_ij = coefficient * *pherom_ij + evap_rate * d_tau;
             *pherom_ji = *pherom_ij;
-            *comb_ij = super::total_value(
-                *pherom_ij,
-                self.heuristic_info[i][j],
-                alpha,
-                beta,
-            );
+            *comb_ij = super::total_value(*pherom_ij, self.heuristic_info[i][j], alpha, beta);
             *comb_ji = *comb_ij;
         }
     }
@@ -138,12 +133,12 @@ fn local_pheromone_update(
     parameters: &AcoParameters,
     initial_trail: f64,
     ant: &Ant,
-) { 
+) {
     let (i, j) = ant.get_last_arc();
     // making them local variables for convenience and readability
     let (alpha, beta, xi) = (parameters.alpha, parameters.beta, parameters.xi);
-    let (mut comb_ij, mut comb_ji, mut pherom_ij, mut pherom_ji) = {  
-        // this mutex lock is necessary because we might have two threads going for (i,j) and (j,i) separetely      
+    let (mut comb_ij, mut comb_ji, mut pherom_ij, mut pherom_ji) = {
+        // this mutex lock is necessary because we might have two threads going for (i,j) and (j,i) separetely
         let _lock = mutex.lock();
         let comb_ij = combined_info[i][j].write();
         let comb_ji = combined_info[j][i].write();
@@ -156,5 +151,5 @@ fn local_pheromone_update(
     *pherom_ij = modified_old_pherom + added_pherom;
     *pherom_ji = *pherom_ij;
     *comb_ij = super::total_value(*pherom_ij, heuristic_info[i][j], alpha, beta);
-    *comb_ji = *comb_ij;    
+    *comb_ji = *comb_ij;
 }

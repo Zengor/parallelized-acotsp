@@ -78,20 +78,23 @@ impl<'a> Colony<'a> for MMASColony<'a> {
             range
                 .into_par_iter()
                 .map(|_| mmas_ant(self.data, &self.combined_info))
-                .min_by_key(|a| a.length).unwrap()
+                .min_by_key(|a| a.length)
+                .unwrap()
         } else {
             range
                 .into_iter()
                 .map(|_| mmas_ant(self.data, &self.combined_info))
-                .min_by_key(|a| a.length).unwrap()
+                .min_by_key(|a| a.length)
+                .unwrap()
         }
     }
 
     fn update_pheromones(&mut self, best_this_iter: &Ant, best_so_far: &Ant) {
-        if self.restart_ant.is_none() ||
-            best_this_iter.length < self.restart_ant.as_ref().unwrap().length {
-                self.restart_ant = Some(best_this_iter.clone());
-                self.restart_iter = self.iteration;                
+        if self.restart_ant.is_none()
+            || best_this_iter.length < self.restart_ant.as_ref().unwrap().length
+        {
+            self.restart_ant = Some(best_this_iter.clone());
+            self.restart_iter = self.iteration;
         }
         let evap_rate = self.parameters.evaporation_rate;
         let (min, max) = calculate_bounding_values(best_so_far.length, self.data.size, evap_rate);
@@ -100,7 +103,7 @@ impl<'a> Colony<'a> for MMASColony<'a> {
         evaporate(&mut self.pheromones, evap_rate);
         let ant_to_use = match self.iteration % 25 {
             0 => &self.restart_ant.as_ref().unwrap_or(best_so_far),
-            _ => best_this_iter,            
+            _ => best_this_iter,
         };
         global_update_pheromones(&mut self.pheromones, ant_to_use);
         self.check_trail_limits();

@@ -20,7 +20,7 @@ pub fn run_aco(data: &InstanceData, parameters: &AcoParameters) -> ResultLog {
     // a Box<Colony>, but the Colony type can't be turned into a trait object. I'm not 100%
     // sure on why, but I believe it's because of the lifetime parameter on the references.
     // I could change the structure so that Colony owns clones of the InstanceData and the
-    // Parameters, but since it'd only fix code repetition in this small section, 
+    // Parameters, but since it'd only fix code repetition in this small section,
     // I'm not sure it's worth it.
     // This structure was also initially chosen to avoid the slight overhead of using trait
     // objects in the first place (though I think it'd ultimately not be that big of a deal.

@@ -191,7 +191,11 @@ pub fn acs_ant_step_sync(
             .iter()
             .enumerate()
             .filter(|(city, _)| !ant.tour.contains(city))
-            .max_by(|(_, a), (_, b)| (*a.read()).partial_cmp(&*b.read()).expect("failed comparison"))
+            .max_by(|(_, a), (_, b)| {
+                (*a.read())
+                    .partial_cmp(&*b.read())
+                    .expect("failed comparison")
+            })
             .expect("failed max_by");
         next_city
     } else {
@@ -202,7 +206,7 @@ pub fn acs_ant_step_sync(
             .iter()
             .enumerate()
             .filter(|(city, _)| !ant.tour.contains(city))
-            .map(|(c,w)| (c, *w.read()))
+            .map(|(c, w)| (c, *w.read()))
             .unzip();
         let mut random_v: f64 = rng.gen::<f64>() * weights.iter().sum::<f64>();
         for (city, weight) in unvisited.iter().zip(weights) {
