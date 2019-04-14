@@ -32,24 +32,26 @@ fn print_log(results: ResultLog, out_path: &str, file_name: &str) -> Result<()> 
     )?;
     writeln!(
         writer,
-        "Found on iteration {} at {}s",
+        "Found on iteration {} at {}.{}s",
         best.iteration,
-        best.timestamp.as_secs()
+        best.timestamp.as_secs(),
+        best.timestamp.subsec_millis()
     )?;
     writeln!(writer, "==========================")?;
     for (i, t) in results.log.iter().enumerate() {
         writeln!(writer, "-----Iter {}, new_best: {}", i + 1, t.is_new_best)?;
         writeln!(
             writer,
-            "length: {} time {}s",
+            "length: {} time {}.{}s",
             t.result.length,
-            t.timestamp.as_secs()
+            t.timestamp.as_secs(),
+            t.timestamp.subsec_millis()
         )?;
-        writeln!(
-            writer,
-            "tour: {:?}",
-            t.result.tour.iter().map(|i| i + 1).collect::<Vec<usize>>()
-        )?;
+        // writeln!(
+        //     writer,
+        //     "tour: {:?}",
+        //     t.result.tour.iter().map(|i| i + 1).collect::<Vec<usize>>()
+        // )?;
     }
     Ok(())
 }
