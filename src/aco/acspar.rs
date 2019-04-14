@@ -108,7 +108,7 @@ impl<'a> Colony<'a> for ACSPar<'a> {
         let coefficient = 1.0 - evap_rate;
         for (&i, &j) in best_so_far.tour.iter().tuple_windows() {
             // this method is always run on the main thread, there's no need to worry 
-            // about using the mutex to get the locks
+            // about avoiding deadlocks by using the mutex before getting the locks
             let mut comb_ij = self.combined_info[i][j].write();
             let mut comb_ji = self.combined_info[j][i].write();
             let mut pherom_ij = self.pheromones[i][j].write();

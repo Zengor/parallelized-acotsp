@@ -33,7 +33,8 @@ pub fn convert_to_sync(matrix: FloatMatrix) -> FloatMatrixSync {
     }
     Arc::new(outer)
 }
-/// Calculates the value of a single tour (assumes first node is 0), used while testing, left in just in case.
+/// Calculates the value of a single tour (assumes first node is 0).
+/// Was used while testing, left in just in case it is ever relevant again.
 #[allow(dead_code)]
 pub fn value_of_tour(distances: &IntegerMatrix, tour: &[usize]) -> u32 {
     use itertools::Itertools;
