@@ -14,7 +14,7 @@ use std::io::prelude::*;
 use std::io::{BufWriter, Result};
 use std::path::PathBuf;
 
-fn print_log(results: ResultLog, out_path: &str, file_name: &str) -> Result<()> {
+fn print_log(results: ResultLog, out_path: &str, file_name: &str, print_tour: bool) -> Result<()> {
     std::fs::create_dir_all(out_path).expect("failed at creating path");
     let out: PathBuf = [out_path, file_name].iter().collect();
     let f = File::create(out.as_path())?;
@@ -30,6 +30,7 @@ fn print_log(results: ResultLog, out_path: &str, file_name: &str) -> Result<()> 
             .map(|i| i + 1)
             .collect::<Vec<usize>>()
     )?;
+
     writeln!(
         writer,
         "Found on iteration {} at {}.{}s",
@@ -47,11 +48,14 @@ fn print_log(results: ResultLog, out_path: &str, file_name: &str) -> Result<()> 
             t.timestamp.as_secs(),
             t.timestamp.subsec_millis()
         )?;
-        // writeln!(
-        //     writer,
-        //     "tour: {:?}",
-        //     t.result.tour.iter().map(|i| i + 1).collect::<Vec<usize>>()
-        // )?;
+        if print_tour {
+            writeln!(
+                writer,
+                "tour: {:?}",
+                t.result.tour.iter().map(|i| i + 1).collect::<Vec<usize>>()
+            )?;
+        }
+        //
     }
     Ok(())
 }
@@ -67,8 +71,13 @@ fn main() {
                             .arg(Arg::with_name("RUN DESCRIPTION FILE")
                                     .help("JSON file with the description of input files, parameters, number of runs, and algorithms to run")
                                     .required(true))
+                            .arg(Arg::with_name(("Print Tour"))
+                                    .short("t")
+                                    .long("tour")
+                                    .takes_value(false)
+                                    .help("Whether the tour itself should be printed "))
                             .get_matches();
-    
+
     let run_file_name = matches
         .value_of("RUN DESCRIPTION FILE")
         .expect("failed parsing argument");
@@ -95,7 +104,13 @@ fn main() {
                 "printing results to {}/{}",
                 &description.out_path, &out_file
             );
-            print_log(results, &description.out_path, &out_file).expect("failed writing log file");
+            print_log(
+                results,
+                &description.out_path,
+                &out_file,
+                matches.is_present("Print Tour"),
+            )
+            .expect("failed writing log file");
             println!("-----")
         }
         println!("==================");
