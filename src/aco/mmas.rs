@@ -22,6 +22,8 @@ pub struct MMASColony<'a> {
     /// Minimum pheromone value for MMAS. This is calculated by the colony.
     pub trail_min: f64,
     parameters: &'a AcoParameters,
+    restart_ant: Option<Ant>,
+    restart_iter: usize,
 }
 
 impl<'a> Colony<'a> for MMASColony<'a> {
@@ -44,11 +46,25 @@ impl<'a> Colony<'a> for MMASColony<'a> {
             trail_max,
             trail_min,
             parameters,
+            restart_ant: None,
+            restart_iter: 1,
         }
     }
 
     fn new_iteration(&mut self) {
         self.iteration += 1;
+        if self.iteration - self.restart_iter >= 150 {
+            println!("restart");
+            self.restart_ant = None;
+            self.reinitialize_trails();
+            recompute_combined_info(
+                &mut self.combined_info,
+                &self.pheromones,
+                &self.heuristic_info,
+                self.parameters,
+            );
+            self.restart_iter = self.iteration;
+        }
     }
 
     fn iteration(&self) -> usize {
@@ -72,14 +88,19 @@ impl<'a> Colony<'a> for MMASColony<'a> {
     }
 
     fn update_pheromones(&mut self, best_this_iter: &Ant, best_so_far: &Ant) {
+        if self.restart_ant.is_none() ||
+            best_this_iter.length < self.restart_ant.as_ref().unwrap().length {
+                self.restart_ant = Some(best_this_iter.clone());
+                self.restart_iter = self.iteration;                
+        }
         let evap_rate = self.parameters.evaporation_rate;
         let (min, max) = calculate_bounding_values(best_so_far.length, self.data.size, evap_rate);
         self.trail_min = min;
         self.trail_max = max;
         evaporate(&mut self.pheromones, evap_rate);
         let ant_to_use = match self.iteration % 25 {
-            0 => best_so_far,
-            _ => best_this_iter,
+            0 => &self.restart_ant.as_ref().unwrap_or(best_so_far),
+            _ => best_this_iter,            
         };
         global_update_pheromones(&mut self.pheromones, ant_to_use);
         self.check_trail_limits();
@@ -110,6 +131,15 @@ impl<'a> MMASColony<'a> {
                     self.pheromones[i][j] = self.trail_max;
                     self.pheromones[j][i] = self.trail_max;
                 }
+            }
+        }
+    }
+
+    fn reinitialize_trails(&mut self) {
+        for i in 0..self.pheromones.len() {
+            for j in 0..i {
+                self.pheromones[i][j] = self.trail_max;
+                self.pheromones[i][j] = self.trail_max;
             }
         }
     }
