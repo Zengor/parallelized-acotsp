@@ -14,6 +14,7 @@ pub trait Colony<'a> {
 }
 
 /// Generates and computes the heuristic info matrix and combined heuristic+pheromone matrix.
+/// Returns a (heuristic, combined) tuple of FloatMatrixs.
 /// Only to be used on initialization, use `recompute_combined_info` to fully update a combined
 /// info matrix in-place.
 pub fn compute_combined_info(
