@@ -124,25 +124,25 @@ impl<'a> MMASColony<'a> {
     }
 
     fn check_trail_limits(&mut self) {
-        for i in 0..self.pheromones.len() {
+        for i in 0..self.pheromones.width() {
             for j in 0..i {
-                if self.pheromones[i][j] < self.trail_min {
-                    self.pheromones[i][j] = self.trail_min;
-                    self.pheromones[j][i] = self.trail_min;
+                if self.pheromones[(i, j)] < self.trail_min {
+                    self.pheromones[(i, j)] = self.trail_min;
+                    self.pheromones[(j, i)] = self.trail_min;
                 }
-                if self.pheromones[i][j] > self.trail_max {
-                    self.pheromones[i][j] = self.trail_max;
-                    self.pheromones[j][i] = self.trail_max;
+                if self.pheromones[(i, j)] > self.trail_max {
+                    self.pheromones[(i, j)] = self.trail_max;
+                    self.pheromones[(j, i)] = self.trail_max;
                 }
             }
         }
     }
 
     fn reinitialize_trails(&mut self) {
-        for i in 0..self.pheromones.len() {
+        for i in 0..self.pheromones.width() {
             for j in 0..i {
-                self.pheromones[i][j] = self.trail_max;
-                self.pheromones[i][j] = self.trail_max;
+                self.pheromones[(i, j)] = self.trail_max;
+                self.pheromones[(j, i)] = self.trail_max;
             }
         }
     }
@@ -161,10 +161,10 @@ fn calculate_bounding_values(
 }
 
 fn evaporate(pheromones: &mut FloatMatrix, evap_rate: f64) {
-    for i in 0..pheromones.len() {
+    for i in 0..pheromones.width() {
         for j in 0..i {
-            pheromones[i][j] = (1.0 - evap_rate) * pheromones[i][j];
-            pheromones[j][i] = pheromones[i][j];
+            pheromones[(i, j)] = (1.0 - evap_rate) * pheromones[(i, j)];
+            pheromones[(j, i)] = pheromones[(i, j)];
         }
     }
 }
@@ -172,7 +172,7 @@ fn evaporate(pheromones: &mut FloatMatrix, evap_rate: f64) {
 pub fn global_update_pheromones(pheromones: &mut FloatMatrix, ant: &Ant) {
     let d_tau = 1.0 / (ant.length as f64);
     for (&i, &j) in ant.tour.iter().tuple_windows() {
-        pheromones[i][j] = pheromones[i][j] + d_tau;
-        pheromones[j][i] = pheromones[i][j];
+        pheromones[(i, j)] = pheromones[(i, j)] + d_tau;
+        pheromones[(j, i)] = pheromones[(i, j)];
     }
 }

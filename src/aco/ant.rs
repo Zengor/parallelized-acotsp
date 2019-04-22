@@ -69,7 +69,7 @@ pub fn nearest_neighbour_tour(data: &InstanceData, starting_city: usize) -> u32 
     let mut next_length = std::u32::MAX;
     let mut length = 0;
     while tour.len() != data.size {
-        for (i, v) in data.distances[curr].iter().enumerate() {
+        for (i, v) in data.distances.row(curr).iter().enumerate() {
             if !tour.contains(&i) && v < &next_length {
                 next = i;
                 next_length = *v;
@@ -81,7 +81,7 @@ pub fn nearest_neighbour_tour(data: &InstanceData, starting_city: usize) -> u32 
         next_length = std::u32::MAX;
     }
     // Include edge between last and initial node in the length
-    length += data.distances[tour.pop().unwrap()][*tour.get_index(0).unwrap()];
+    length += data.distances[(tour.pop().unwrap(), *tour.get_index(0).unwrap())];
     length
 }
 
@@ -92,7 +92,8 @@ fn choose_best_next(
     visited: &IndexSet<usize>,
     combined_info: &FloatMatrix,
 ) -> usize {
-    let (next_city, _) = combined_info[curr_city]
+    let (next_city, _) = combined_info
+        .row(curr_city)
         .iter()
         .enumerate()
         .filter(|(city, _)| !visited.contains(city))
@@ -109,7 +110,8 @@ fn choose_probabilistically(
     combined_info: &FloatMatrix,
     rng: &mut impl Rng,
 ) -> usize {
-    let (unvisited, weights): (Vec<usize>, Vec<f64>) = combined_info[curr_city]
+    let (unvisited, weights): (Vec<usize>, Vec<f64>) = combined_info
+        .row(curr_city)
         .iter()
         .enumerate()
         .filter(|(city, _)| !visited.contains(city))
@@ -133,10 +135,10 @@ pub fn mmas_ant(data: &InstanceData, combined_info: &FloatMatrix) -> Ant {
         let next_city = choose_probabilistically(ant.curr_city, &ant.tour, combined_info, &mut rng);
         //TODO use nn_list to aid performance
         //let next_city = choose_best_next(ant.curr_city, &ant.tour, combined_info);
-        ant.insert(next_city, data.distances[ant.curr_city][next_city]);
+        ant.insert(next_city, data.distances[(ant.curr_city, next_city)]);
     }
     // Include edge between last and initial node in the length
-    ant.length += data.distances[ant.get_last()][ant.get_first()];
+    ant.length += data.distances[(ant.get_last(), ant.get_first())];
     ant
 }
 
@@ -167,7 +169,7 @@ pub fn acs_ant_step(
         //get probabilistic
         choose_probabilistically(ant.curr_city, &ant.tour, combined_info, &mut rng)
     };
-    ant.insert(next_city, data.distances[ant.curr_city][next_city]);
+    ant.insert(next_city, data.distances[(ant.curr_city, next_city)]);
     ant
 }
 
@@ -187,7 +189,8 @@ pub fn acs_ant_step_sync(
     let next_city = if rng.gen_bool(parameters.q_0) {
         // get max heuristic info
         //choose_best_next(ant.curr_city, &ant.tour, combined_info)
-        let (next_city, _) = combined_info[ant.curr_city]
+        let (next_city, _) = combined_info
+            .row(ant.curr_city)
             .iter()
             .enumerate()
             .filter(|(city, _)| !ant.tour.contains(city))
@@ -202,7 +205,8 @@ pub fn acs_ant_step_sync(
         //get probabilistic
         //choose_probabilistically(ant.curr_city, &ant.tour, combined_info, &mut rng)
         let mut next_city = 0;
-        let (unvisited, weights): (Vec<usize>, Vec<f64>) = combined_info[ant.curr_city]
+        let (unvisited, weights): (Vec<usize>, Vec<f64>) = combined_info
+            .row(ant.curr_city)
             .iter()
             .enumerate()
             .filter(|(city, _)| !ant.tour.contains(city))
@@ -218,6 +222,6 @@ pub fn acs_ant_step_sync(
         }
         next_city
     };
-    ant.insert(next_city, data.distances[ant.curr_city][next_city]);
+    ant.insert(next_city, data.distances[(ant.curr_city, next_city)]);
     ant
 }

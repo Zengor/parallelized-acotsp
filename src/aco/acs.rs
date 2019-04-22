@@ -82,7 +82,7 @@ impl<'a> Colony<'a> for ACSColony<'a> {
             }
         }
         for ant in ants_vec.iter_mut() {
-            ant.length += self.data.distances[ant.get_last()][ant.get_first()];
+            ant.length += self.data.distances[(ant.get_last(), ant.get_first())];
         }
         ants_vec.into_iter().min_by_key(|a| a.length).unwrap()
     }
@@ -96,15 +96,15 @@ impl<'a> Colony<'a> for ACSColony<'a> {
         );
         let coefficient = 1.0 - evap_rate;
         for (&i, &j) in best_so_far.tour.iter().tuple_windows() {
-            self.pheromones[i][j] = coefficient * self.pheromones[i][j] + evap_rate * d_tau;
-            self.pheromones[j][i] = self.pheromones[i][j];
-            self.combined_info[i][j] = super::total_value(
-                self.pheromones[i][j],
-                self.heuristic_info[i][j],
+            self.pheromones[(i, j)] = coefficient * self.pheromones[(i, j)] + evap_rate * d_tau;
+            self.pheromones[(j, i)] = self.pheromones[(i, j)];
+            self.combined_info[(i, j)] = super::total_value(
+                self.pheromones[(i, j)],
+                self.heuristic_info[(i, j)],
                 alpha,
                 beta,
             );
-            self.combined_info[j][i] = self.combined_info[i][j];
+            self.combined_info[(j, i)] = self.combined_info[(i, j)];
         }
     }
 }
@@ -125,18 +125,18 @@ impl<'a> ACSColony<'a> {
             self.parameters.xi,
         );
         // calculating new pheromone value
-        let modified_old_pherom = (1.0 - xi) * self.pheromones[i][j];
+        let modified_old_pherom = (1.0 - xi) * self.pheromones[(i, j)];
         let added_pherom = xi * self.initial_trail;
-        self.pheromones[i][j] = modified_old_pherom + added_pherom;
-        self.pheromones[j][i] = self.pheromones[i][j];
+        self.pheromones[(i, j)] = modified_old_pherom + added_pherom;
+        self.pheromones[(j, i)] = self.pheromones[(i, j)];
         // update combined info
-        self.combined_info[i][j] = super::total_value(
-            self.pheromones[i][j],
-            self.heuristic_info[i][j],
+        self.combined_info[(i, j)] = super::total_value(
+            self.pheromones[(i, j)],
+            self.heuristic_info[(i, j)],
             alpha,
             beta,
         );
-        self.combined_info[j][i] = self.combined_info[i][j];
+        self.combined_info[(j, i)] = self.combined_info[(i, j)];
     }
 }
 

@@ -71,7 +71,7 @@ fn main() {
                             .arg(Arg::with_name("RUN DESCRIPTION FILE")
                                     .help("JSON file with the description of input files, parameters, number of runs, and algorithms to run")
                                     .required(true))
-                            .arg(Arg::with_name(("Print Tour"))
+                            .arg(Arg::with_name("Print Tour")
                                     .short("t")
                                     .long("tour")
                                     .takes_value(false)

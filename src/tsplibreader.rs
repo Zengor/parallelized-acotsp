@@ -54,12 +54,11 @@ fn read_node_coord_section(
         let split: Vec<_> = line.split_whitespace().collect();
         nodes.push((split[1].parse().unwrap(), split[2].parse().unwrap()));
     }
-    let mut distances: crate::util::IntegerMatrix = Vec::with_capacity(size);
+    let mut distances = crate::util::IntegerMatrix::with_capacity(size * size);
     for (i, &node_i) in nodes.iter().enumerate() {
-        let mut distances_from_this_node: Vec<u32> = Vec::with_capacity(size);
         for (j, &node_j) in nodes.iter().enumerate() {
             if i == j {
-                distances_from_this_node.push(std::u32::MAX);
+                distances.push(std::u32::MAX);
                 continue;
             }
             match metadata
@@ -67,11 +66,10 @@ fn read_node_coord_section(
                 .as_ref()
                 .expect("No defined edge_weight_type")
             {
-                EUC_2D => distances_from_this_node.push(distance_funcs::euc_2d(node_i, node_j)),
+                EUC_2D => distances.push(distance_funcs::euc_2d(node_i, node_j)),
                 _ => unimplemented!(),
             }
         }
-        distances.push(distances_from_this_node);
     }
     InstanceData { size, distances }
 }

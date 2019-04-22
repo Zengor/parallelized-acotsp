@@ -83,5 +83,5 @@ pub fn total_value(pheromone: f64, heuristic: f64, alpha: f64, beta: f64) -> f64
 }
 
 fn heuristic(distances: &IntegerMatrix, i: usize, j: usize) -> f64 {
-    1.0 / ((distances[i][j] as f64) + 0.1)
+    1.0 / ((distances[(i, j)] as f64) + 0.1)
 }

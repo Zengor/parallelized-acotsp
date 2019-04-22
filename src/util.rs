@@ -2,13 +2,34 @@ use parking_lot::RwLock;
 use std::ops::{Index, IndexMut};
 use std::sync::Arc;
 
-pub type FloatMatrix = Vec<Vec<f64>>;
-pub type IntegerMatrix = Vec<Vec<u32>>;
-pub type FloatMatrixSync = Arc<Vec<Vec<Arc<RwLock<f64>>>>>;
+pub type FloatMatrix = Matrix<f64>;
+pub type IntegerMatrix = Matrix<u32>;
+pub type FloatMatrixSync = Arc<Matrix<Arc<RwLock<f64>>>>;
 
 pub struct Matrix<T> {
-    pub data: Vec<T>,
-    pub width: usize,
+    data: Vec<T>,
+    width: usize,
+}
+
+impl<T> Matrix<T> {
+    pub fn width(&self) -> usize {
+        self.width
+    }
+
+    pub fn row(&self, i: usize) -> &[T] {
+        return &self.data[i * self.width..i * self.width + self.width];
+    }
+
+    pub fn with_capacity(size: usize) -> Matrix<T> {
+        Matrix {
+            data: Vec::with_capacity(size * size),
+            width: size,
+        }
+    }
+
+    pub fn push(&mut self, value: T) {
+        self.data.push(value);
+    }
 }
 
 impl<T: Clone> Matrix<T> {
@@ -37,32 +58,25 @@ impl<T> IndexMut<(usize, usize)> for Matrix<T> {
 }
 
 pub fn generate_pheromone_matrix(size: usize, value: f64) -> FloatMatrix {
-    let mut matrix = generate_filled_matrix(size, value);
+    let mut matrix = Matrix::with_element(size, value);
     for i in 0..size {
-        matrix[i][i] = std::f64::MAX;
+        matrix[(i, i)] = std::f64::MAX;
     }
     matrix
 }
 
-pub fn generate_filled_matrix<T: Copy>(size: usize, element: T) -> Vec<Vec<T>> {
-    let mut out = Vec::with_capacity(size);
-    for _ in 0..size {
-        out.push(vec![element; size]);
-    }
-    out
-}
-
 pub fn convert_to_sync(matrix: FloatMatrix) -> FloatMatrixSync {
-    let mut outer = Vec::with_capacity(matrix.len());
-    for inner in matrix.into_iter() {
-        outer.push(
-            inner
-                .into_iter()
-                .map(|x| Arc::new(RwLock::new(x)))
-                .collect(),
-        );
-    }
-    Arc::new(outer)
+    let width = matrix.width;
+    let sync_vec = matrix
+        .data
+        .into_iter()
+        .map(|x| Arc::new(RwLock::new(x)))
+        .collect();
+
+    Arc::new(Matrix {
+        data: sync_vec,
+        width,
+    })
 }
 
 /// Calculates the value of a single tour (assumes first node is 0).
@@ -72,9 +86,9 @@ pub fn value_of_tour(distances: &IntegerMatrix, tour: &[usize]) -> u32 {
     use itertools::Itertools;
     let mut length = 0;
     for (&i, &j) in tour.iter().tuple_windows() {
-        length += distances[i][j];
+        length += distances[(i, j)];
     }
-    length += distances[tour[tour.len() - 1]][tour[0]];
+    length += distances[(tour[tour.len() - 1], tour[0])];
     length
 }
 
