@@ -17,7 +17,7 @@ impl<T> Matrix<T> {
     }
 
     pub fn row(&self, i: usize) -> &[T] {
-        return &self.data[i * self.width..i * self.width + self.width];
+        return &self.data[(i * self.width)..(i * self.width + self.width)];
     }
 
     pub fn with_capacity(size: usize) -> Matrix<T> {

@@ -54,7 +54,7 @@ fn read_node_coord_section(
         let split: Vec<_> = line.split_whitespace().collect();
         nodes.push((split[1].parse().unwrap(), split[2].parse().unwrap()));
     }
-    let mut distances = crate::util::IntegerMatrix::with_capacity(size * size);
+    let mut distances = crate::util::IntegerMatrix::with_capacity(size);
     for (i, &node_i) in nodes.iter().enumerate() {
         for (j, &node_j) in nodes.iter().enumerate() {
             if i == j {
