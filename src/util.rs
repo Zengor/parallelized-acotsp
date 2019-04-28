@@ -4,7 +4,7 @@ use std::sync::Arc;
 
 pub type FloatMatrix = Matrix<f64>;
 pub type IntegerMatrix = Matrix<u32>;
-pub type FloatMatrixSync = Arc<Matrix<Arc<RwLock<f64>>>>;
+pub type FloatMatrixSync = Arc<Matrix<RwLock<f64>>>;
 
 #[derive(Debug)]
 pub struct Matrix<T> {
@@ -71,7 +71,7 @@ pub fn convert_to_sync(matrix: FloatMatrix) -> FloatMatrixSync {
     let sync_vec = matrix
         .data
         .into_iter()
-        .map(|x| Arc::new(RwLock::new(x)))
+        .map(|x| RwLock::new(x))
         .collect();
 
     Arc::new(Matrix {
