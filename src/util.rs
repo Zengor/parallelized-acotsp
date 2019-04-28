@@ -6,6 +6,7 @@ pub type FloatMatrix = Matrix<f64>;
 pub type IntegerMatrix = Matrix<u32>;
 pub type FloatMatrixSync = Arc<Matrix<Arc<RwLock<f64>>>>;
 
+#[derive(Debug)]
 pub struct Matrix<T> {
     data: Vec<T>,
     width: usize,
@@ -115,13 +116,15 @@ pub mod test {
     #[test]
     pub fn matrix_text() {
         let size = 10;
-        let mut matrix = Matrix::with_element(size, 0.0);
+        let mut matrix = Matrix::with_element(size, 0);
         for i in 0..size * size {
-            matrix.data[i] = 0.0 + i as f32;
+            matrix.data[i] = 0 + i;
         }
         assert_eq!(matrix.data[10], matrix[(0, 1)]);
         assert_eq!(matrix.data[1], matrix[(1, 0)]);
-        assert_eq!(matrix.data[99], matrix[(9, 9)])
+        assert_eq!(matrix.data[99], matrix[(9, 9)]);
+        assert_eq!(matrix.row(0), &[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+        assert_eq!(matrix.row(3), &[30, 31, 32, 33, 34, 35, 36, 37, 38, 39]);
     }
 
 }
