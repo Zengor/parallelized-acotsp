@@ -27,7 +27,7 @@ pub fn compute_combined_info(
     for i in 0..distances.width() {
         for j in 0..i {
             heuristic_info[(i, j)] = super::heuristic(distances, i, j);
-            heuristic_info[(i, j)] = heuristic_info[(i, j)];
+            heuristic_info[(j, i)] = heuristic_info[(i, j)];
             combined_info[(i, j)] = super::total_value(
                 pheromones[(i, j)],
                 heuristic_info[(i, j)],
