@@ -1,5 +1,5 @@
 use lazy_static::lazy_static;
-use std::sync::Mutex;
+use parking_lot::Mutex;
 use std::time::{Duration, Instant};
 
 // is this even the best way to do this??
@@ -20,9 +20,9 @@ impl Stopwatch {
 }
 
 pub fn restart_timer() {
-    TIMER.lock().unwrap().start = Instant::now();
+    TIMER.lock().start = Instant::now();
 }
 
 pub fn elapsed() -> Duration {
-    TIMER.lock().unwrap().start.elapsed()
+    TIMER.lock().start.elapsed()
 }
