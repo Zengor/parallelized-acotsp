@@ -75,6 +75,7 @@ pub fn nearest_neighbour_tour(data: &InstanceData, starting_city: usize) -> u32 
                 next_length = *v;
             }
         }
+
         tour.insert(next);
         length += next_length;
         curr = next;
@@ -85,8 +86,8 @@ pub fn nearest_neighbour_tour(data: &InstanceData, starting_city: usize) -> u32 
     length
 }
 
-/// Chooses an unvisited city to go to with the highest total combined heuristic+pheromone information
-/// Returns the index of that city.
+/// Chooses an unvisited city to go to with the highest total combined heuristic+pheromone
+/// information. Returns the index of that city.
 fn choose_best_next(
     curr_city: usize,
     visited: &IndexSet<usize>,
@@ -183,7 +184,7 @@ pub fn acs_ant_step_sync(
     // this code is very verbose and repeats code done by other functions,
     // which could be perhaps avoided with some refactoring and using some new traits.
     // it includes a complete repeat of the choose_best_next and choose_probabilistically function
-    // except that they're now accounting for the fact that combined_info holds Arc<RwLocks> which must be handled.
+    // except that they're now accounting for the fact that combined_info holds RwLocks which must be handled.
 
     let mut rng = thread_rng();
     let next_city = if rng.gen_bool(parameters.q_0) {

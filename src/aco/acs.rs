@@ -24,26 +24,6 @@ pub struct ACSColony<'a> {
 }
 
 impl<'a> Colony<'a> for ACSColony<'a> {
-    fn initialize_colony(data: &'a InstanceData, parameters: &'a AcoParameters) -> ACSColony<'a> {
-        let nn_tour_length = ant::nearest_neighbour_tour(data, 0);
-        let initial_trail = calculate_initial_values(nn_tour_length, data.size);
-        let pheromones = util::generate_pheromone_matrix(data.size, initial_trail);
-        let (heuristic_info, combined_info) =
-            compute_combined_info(&data.distances, &pheromones, parameters);
-
-        Self {
-            iteration: 0,
-            parallel: false,
-            data,
-            pheromones,
-            heuristic_info,
-            combined_info,
-            //nn_list: super::generate_nn_list(data),
-            initial_trail,
-            parameters,
-        }
-    }
-
     fn new_iteration(&mut self) {
         self.iteration += 1
     }
@@ -110,10 +90,28 @@ impl<'a> Colony<'a> for ACSColony<'a> {
 }
 
 impl<'a> ACSColony<'a> {
-    pub fn initialize_parallel(data: &'a InstanceData, parameters: &'a AcoParameters) -> Self {
-        let mut colony = ACSColony::initialize_colony(data, parameters);
-        colony.parallel = true;
-        colony
+    pub fn initialize_colony(
+        data: &'a InstanceData,
+        parameters: &'a AcoParameters,
+        parallel: bool,
+    ) -> ACSColony<'a> {
+        let nn_tour_length = ant::nearest_neighbour_tour(data, 0);
+        let initial_trail = calculate_initial_values(nn_tour_length, data.size);
+        let pheromones = util::generate_pheromone_matrix(data.size, initial_trail);
+        let (heuristic_info, combined_info) =
+            compute_combined_info(&data.distances, &pheromones, parameters);
+
+        Self {
+            iteration: 0,
+            parallel,
+            data,
+            pheromones,
+            heuristic_info,
+            combined_info,
+            //nn_list: super::generate_nn_list(data),
+            initial_trail,
+            parameters,
+        }
     }
 
     fn local_pheromone_update(&mut self, ant: &ant::Ant) {

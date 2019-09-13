@@ -16,30 +16,28 @@ pub use self::result_log::{ResultLog, TimestampedResult};
 
 pub fn run_aco(data: &InstanceData, parameters: &AcoParameters) -> ResultLog {
     let algorithm = &parameters.algorithm;
-    // This section has a bit of code repetition. This could be reduced by using
-    // a Box<Colony>, but the Colony type can't be turned into a trait object. I'm not 100%
-    // sure on why, but I believe it's because of the lifetime parameter on the references.
-    // I could change the structure so that Colony owns clones of the InstanceData and the
-    // Parameters, but since it'd only fix code repetition in this small section,
+    // Colony can't be turned into trait objects because of the `initialize_colony`
+    // method. It could easily be moved out into each implementor's impl,
+    // but since it'd only fix code repetition in this small section,
     // I'm not sure it's worth it.
-    // This structure was also initially chosen to avoid the slight overhead of using trait
+    // This structure was initially chosen to avoid the slight overhead of using trait
     // objects in the first place (though I think it'd ultimately not be that big of a deal.
     // Haven't actually tested it, though).
     match *algorithm {
         Algorithm::MMAS => {
-            let colony = mmas::MMASColony::initialize_colony(data, parameters);
+            let colony = mmas::MMASColony::initialize_colony(data, parameters,false);
             run_colony(colony, parameters.max_iterations, parameters.time_limit)
         }
         Algorithm::MMASPar => {
-            let colony = mmas::MMASColony::initialize_parallel(data, parameters);
+            let colony = mmas::MMASColony::initialize_colony(data, parameters,true);
             run_colony(colony, parameters.max_iterations, parameters.time_limit)
         }
         Algorithm::ACS => {
-            let colony = acs::ACSColony::initialize_colony(data, parameters);
+            let colony = acs::ACSColony::initialize_colony(data, parameters,false);
             run_colony(colony, parameters.max_iterations, parameters.time_limit)
         }
         Algorithm::ACSParMasterUpdate => {
-            let colony = acs::ACSColony::initialize_parallel(data, parameters);
+            let colony = acs::ACSColony::initialize_colony(data, parameters,true);
             run_colony(colony, parameters.max_iterations, parameters.time_limit)
         }
         Algorithm::ACSParSync => {

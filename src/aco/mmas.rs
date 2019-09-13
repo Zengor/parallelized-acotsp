@@ -27,30 +27,6 @@ pub struct MMASColony<'a> {
 }
 
 impl<'a> Colony<'a> for MMASColony<'a> {
-    fn initialize_colony(data: &'a InstanceData, parameters: &'a AcoParameters) -> MMASColony<'a> {
-        let nn_tour_length = ant::nearest_neighbour_tour(data, 0);
-        let (trail_min, trail_max) =
-            calculate_bounding_values(nn_tour_length, data.size, parameters.evaporation_rate);
-        let pheromones = util::generate_pheromone_matrix(data.size, trail_max);
-        let (heuristic_info, combined_info) =
-            compute_combined_info(&data.distances, &pheromones, parameters);
-
-        Self {
-            iteration: 0,
-            parallel: false,
-            data,
-            pheromones,
-            heuristic_info,
-            combined_info,
-            //nn_list: super::generate_nn_list(data),
-            trail_max,
-            trail_min,
-            parameters,
-            restart_ant: None,
-            restart_iter: 1,
-        }
-    }
-
     fn new_iteration(&mut self) {
         self.iteration += 1;
         if self.iteration - self.restart_iter >= 150 {
@@ -117,12 +93,34 @@ impl<'a> Colony<'a> for MMASColony<'a> {
 }
 
 impl<'a> MMASColony<'a> {
-    pub fn initialize_parallel(data: &'a InstanceData, parameters: &'a AcoParameters) -> Self {
-        let mut colony = MMASColony::initialize_colony(data, parameters);
-        colony.parallel = true;
-        colony
-    }
+    pub fn initialize_colony(
+        data: &'a InstanceData,
+        parameters: &'a AcoParameters,
+        parallel: bool,
+    ) -> MMASColony<'a> {
+        let nn_tour_length = ant::nearest_neighbour_tour(data, 0);
+        let (trail_min, trail_max) =
+            calculate_bounding_values(nn_tour_length, data.size, parameters.evaporation_rate);
+        let pheromones = util::generate_pheromone_matrix(data.size, trail_max);
+        let (heuristic_info, combined_info) =
+            compute_combined_info(&data.distances, &pheromones, parameters);
 
+        Self {
+            iteration: 0,
+            parallel,
+            data,
+            pheromones,
+            heuristic_info,
+            combined_info,
+            //nn_list: super::generate_nn_list(data),
+            trail_max,
+            trail_min,
+            parameters,
+            restart_ant: None,
+            restart_iter: 1,
+        }
+    }
+    
     fn check_trail_limits(&mut self) {
         for i in 0..self.pheromones.width() {
             for j in 0..i {

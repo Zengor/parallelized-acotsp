@@ -25,8 +25,8 @@ pub struct ACSPar<'a> {
     parameters: &'a AcoParameters,
 }
 
-impl<'a> Colony<'a> for ACSPar<'a> {
-    fn initialize_colony(data: &'a InstanceData, parameters: &'a AcoParameters) -> ACSPar<'a> {
+impl<'a> ACSPar<'a> {
+    pub fn initialize_colony(data: &'a InstanceData, parameters: &'a AcoParameters) -> ACSPar<'a> {
         let nn_tour_length = ant::nearest_neighbour_tour(data, 0);
         let initial_trail = calculate_initial_values(nn_tour_length, data.size);
         let pheromones = util::generate_pheromone_matrix(data.size, initial_trail);
@@ -46,7 +46,9 @@ impl<'a> Colony<'a> for ACSPar<'a> {
             parameters,
         }
     }
+}
 
+impl<'a> Colony<'a> for ACSPar<'a> {
     fn new_iteration(&mut self) {
         self.iteration += 1
     }
@@ -107,8 +109,9 @@ impl<'a> Colony<'a> for ACSPar<'a> {
         );
         let coefficient = 1.0 - evap_rate;
         for (&i, &j) in best_so_far.tour.iter().tuple_windows() {
-            // this method is always run on the main thread, there's no need to worry
-            // about avoiding deadlocks by using the mutex before getting the locks
+            // this method is always run on the main thread, while no slave threads
+            // are executing, so there's no need to worry about avoiding deadlocks
+            // by using the mutex before getting the locks
             let mut comb_ij = self.combined_info[(i, j)].write();
             let mut comb_ji = self.combined_info[(j, i)].write();
             let mut pherom_ij = self.pheromones[(i, j)].write();
@@ -138,7 +141,10 @@ fn local_pheromone_update(
     // making them local variables for convenience and readability
     let (alpha, beta, xi) = (parameters.alpha, parameters.beta, parameters.xi);
     let (mut comb_ij, mut comb_ji, mut pherom_ij, mut pherom_ji) = {
-        // this mutex lock is necessary because we might have two threads going for (i,j) and (j,i) separetely
+        // this mutex lock is necessary because we might
+        // have two threads going for (i,j) and (j,i) separetely.
+        // once this blocks end the lock is dropped (and so, freed),
+        // but we still have the RwLocks from the actual matrices
         let _lock = mutex.lock();
         let comb_ij = combined_info[(i, j)].write();
         let comb_ji = combined_info[(j, i)].write();

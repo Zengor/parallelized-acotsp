@@ -5,8 +5,9 @@ use super::AcoParameters;
 use crate::instance_data::InstanceData;
 use crate::util::{self, FloatMatrix, IntegerMatrix};
 
+
+
 pub trait Colony<'a> {
-    fn initialize_colony(data: &'a InstanceData, parameters: &'a AcoParameters) -> Self;
     fn new_iteration(&mut self);
     fn iteration(&self) -> usize;
     fn construct_solutions(&mut self) -> Ant;
