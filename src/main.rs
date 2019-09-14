@@ -18,7 +18,7 @@ fn print_log(results: ResultLog, out_path: &str, file_name: &str, print_tour: bo
     std::fs::create_dir_all(out_path).expect("failed at creating path");
     let out: PathBuf = [out_path, file_name].iter().collect();
     let f = File::create(out.as_path())?;
-    let mut writer = BufWriter::new(f);
+    let mut writer = BufWriter::new(f);    
     let best = results.best_timestamped();
     writeln!(writer, "BEST FOUND: {}", best.result.length)?;
     writeln!(

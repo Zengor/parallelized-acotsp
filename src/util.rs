@@ -6,6 +6,8 @@ pub type FloatMatrix = Matrix<f64>;
 pub type IntegerMatrix = Matrix<u32>;
 pub type FloatMatrixSync = Arc<Matrix<RwLock<f64>>>;
 
+/// A very simple implementation of a matrix abstraction. It's
+/// simply a Vec an associated 'width' that is used for indexing.
 #[derive(Debug)]
 pub struct Matrix<T> {
     data: Vec<T>,
@@ -21,6 +23,7 @@ impl<T> Matrix<T> {
         return &self.data[(i * self.width)..(i * self.width + self.width)];
     }
 
+    /// Returns a Matrix with memory allocated for size*size elements.
     pub fn with_capacity(size: usize) -> Matrix<T> {
         Matrix {
             data: Vec::with_capacity(size * size),
@@ -34,6 +37,8 @@ impl<T> Matrix<T> {
 }
 
 impl<T: Clone> Matrix<T> {
+    /// Creates a size*size Matrix with the given initial element
+    /// occupying all positions.
     pub fn with_element(size: usize, element: T) -> Matrix<T> {
         Matrix {
             data: vec![element; size * size],
@@ -58,6 +63,10 @@ impl<T> IndexMut<(usize, usize)> for Matrix<T> {
     }
 }
 
+/// Creates a size*size Matrix meant to store pheromones with a given
+/// initial value. The main diagonal will be set to f64::MAX so that
+/// ants will not go repeatedly towards the same city without additional
+/// checks.
 pub fn generate_pheromone_matrix(size: usize, value: f64) -> FloatMatrix {
     let mut matrix = Matrix::with_element(size, value);
     for i in 0..size {
@@ -66,6 +75,8 @@ pub fn generate_pheromone_matrix(size: usize, value: f64) -> FloatMatrix {
     matrix
 }
 
+/// Wraps each element of a matrix in a `RwLock`, and then wraps
+/// matrix in an `Arc`. Used with the parallelized version of ACS.
 pub fn convert_to_sync(matrix: FloatMatrix) -> FloatMatrixSync {
     let width = matrix.width;
     let sync_vec = matrix
@@ -114,7 +125,7 @@ pub mod test {
     }
 
     #[test]
-    pub fn matrix_text() {
+    pub fn matrix_test() {
         let size = 10;
         let mut matrix = Matrix::with_element(size, 0);
         for i in 0..size * size {

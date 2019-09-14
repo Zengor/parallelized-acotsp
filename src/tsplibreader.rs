@@ -28,7 +28,9 @@ pub fn read_instance_file(f_name: &str) -> FileData {
 
     let instance_data = match data_layout {
         NODE_COORD_SECTION => read_node_coord_section(lines, &metadata, size),
-        _ => unimplemented!(),
+        // all instances used so far have been NODE_COORD_SECTION, so no
+        // other modes have been implemented yet
+        // _ => unimplemented!(),
     };
 
     FileData {
@@ -67,7 +69,9 @@ fn read_node_coord_section(
                 .expect("No defined edge_weight_type")
             {
                 EUC_2D => distances.push(distance_funcs::euc_2d(node_i, node_j)),
-                _ => unimplemented!(),
+                // all instances used so far have used EUC_2D, so no
+                // other modes have been implemented yet
+                // _ => unimplemented!(),
             }
         }
     }

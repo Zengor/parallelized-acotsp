@@ -14,30 +14,32 @@ pub use self::ant::Ant;
 use self::colony::Colony;
 pub use self::result_log::{ResultLog, TimestampedResult};
 
+/// Sets up and runs the algorithm.
 pub fn run_aco(data: &InstanceData, parameters: &AcoParameters) -> ResultLog {
     let algorithm = &parameters.algorithm;
-    // Colony can't be turned into trait objects because of the `initialize_colony`
-    // method. It could easily be moved out into each implementor's impl,
-    // but since it'd only fix code repetition in this small section,
-    // I'm not sure it's worth it.
+    // Colony could be turned into a trait object to avoid core repetition here,
+    // but I'm not sure if it's worth it.
     // This structure was initially chosen to avoid the slight overhead of using trait
     // objects in the first place (though I think it'd ultimately not be that big of a deal.
     // Haven't actually tested it, though).
+    // Since this is the only place that would be affected by a change in terms of
+    // code length and readibility, I decided to leave it as is. If more colonies
+    // were to be implemented, I'd probably change to using a trait object
     match *algorithm {
         Algorithm::MMAS => {
-            let colony = mmas::MMASColony::initialize_colony(data, parameters,false);
+            let colony = mmas::MMASColony::initialize_colony(data, parameters, false);
             run_colony(colony, parameters.max_iterations, parameters.time_limit)
         }
         Algorithm::MMASPar => {
-            let colony = mmas::MMASColony::initialize_colony(data, parameters,true);
+            let colony = mmas::MMASColony::initialize_colony(data, parameters, true);
             run_colony(colony, parameters.max_iterations, parameters.time_limit)
         }
         Algorithm::ACS => {
-            let colony = acs::ACSColony::initialize_colony(data, parameters,false);
+            let colony = acs::ACSColony::initialize_colony(data, parameters, false);
             run_colony(colony, parameters.max_iterations, parameters.time_limit)
         }
         Algorithm::ACSParMasterUpdate => {
-            let colony = acs::ACSColony::initialize_colony(data, parameters,true);
+            let colony = acs::ACSColony::initialize_colony(data, parameters, true);
             run_colony(colony, parameters.max_iterations, parameters.time_limit)
         }
         Algorithm::ACSParSync => {
@@ -76,6 +78,9 @@ fn find_best<'a>(results: &'a [Ant]) -> &'a Ant {
     results.iter().min_by_key(|x| x.length).unwrap()
 }
 
+/// Function to calculate the total weight of a given connection, combining its current
+/// pheromones and the inherit heuristic information, modified by algorithm parameters
+/// alpha and beta. 
 pub fn total_value(pheromone: f64, heuristic: f64, alpha: f64, beta: f64) -> f64 {
     pheromone.powf(alpha) * heuristic.powf(beta)
 }

@@ -11,8 +11,6 @@ pub struct InstanceData {
     pub distances: IntegerMatrix,
 }
 
-impl InstanceData {}
-
 #[allow(non_camel_case_types)]
 pub enum DataDescriptionType {
     NODE_COORD_SECTION,
