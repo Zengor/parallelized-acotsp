@@ -11,7 +11,7 @@ use super::Ant;
 
 use std::sync::Arc;
 
-pub struct ACSPar<'a> {
+pub struct AcsPar<'a> {
     iteration: usize,
     data: &'a InstanceData,
     lock_mutex: Arc<Mutex<()>>,
@@ -25,8 +25,8 @@ pub struct ACSPar<'a> {
     parameters: &'a AcoParameters,
 }
 
-impl<'a> ACSPar<'a> {
-    pub fn initialize_colony(data: &'a InstanceData, parameters: &'a AcoParameters) -> ACSPar<'a> {
+impl<'a> AcsPar<'a> {
+    pub fn initialize_colony(data: &'a InstanceData, parameters: &'a AcoParameters) -> AcsPar<'a> {
         let nn_tour_length = ant::nearest_neighbour_tour(data, 0);
         let initial_trail = calculate_initial_values(nn_tour_length, data.size);
         let pheromones = util::generate_pheromone_matrix(data.size, initial_trail);
@@ -48,7 +48,7 @@ impl<'a> ACSPar<'a> {
     }
 }
 
-impl<'a> Colony<'a> for ACSPar<'a> {
+impl<'a> Colony<'a> for AcsPar<'a> {
     fn new_iteration(&mut self) {
         self.iteration += 1
     }

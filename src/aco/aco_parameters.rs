@@ -2,15 +2,15 @@ use serde_derive::Deserialize;
 
 #[derive(Deserialize, Debug)]
 pub enum Algorithm {
-    MMAS,
-    MMASPar,
-    ACS,
-    ACSPar,
+    Mmas,
+    MmasPar,
+    Acs,
+    AcsPar,
 }
 
 impl Default for Algorithm {
     fn default() -> Algorithm {
-        Algorithm::ACS
+        Algorithm::Acs
     }
 }
 

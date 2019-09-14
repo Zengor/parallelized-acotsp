@@ -26,20 +26,20 @@ pub fn run_aco(data: &InstanceData, parameters: &AcoParameters) -> ResultLog {
     // code length and readibility, I decided to leave it as is. If more colonies
     // were to be implemented, I'd probably change to using a trait object
     match *algorithm {
-        Algorithm::MMAS => {
-            let colony = mmas::MMASColony::initialize_colony(data, parameters, false);
+        Algorithm::Mmas => {
+            let colony = mmas::MmasColony::initialize_colony(data, parameters, false);
             run_colony(colony, parameters.max_iterations, parameters.time_limit)
         }
-        Algorithm::MMASPar => {
-            let colony = mmas::MMASColony::initialize_colony(data, parameters, true);
+        Algorithm::MmasPar => {
+            let colony = mmas::MmasColony::initialize_colony(data, parameters, true);
             run_colony(colony, parameters.max_iterations, parameters.time_limit)
         }
-        Algorithm::ACS => {
-            let colony = acs::ACSColony::initialize_colony(data, parameters);
+        Algorithm::Acs => {
+            let colony = acs::AcsColony::initialize_colony(data, parameters);
             run_colony(colony, parameters.max_iterations, parameters.time_limit)
         }
-        Algorithm::ACSPar => {
-            let colony = acspar::ACSPar::initialize_colony(data, parameters);
+        Algorithm::AcsPar => {
+            let colony = acspar::AcsPar::initialize_colony(data, parameters);
             run_colony(colony, parameters.max_iterations, parameters.time_limit)
         }
     }

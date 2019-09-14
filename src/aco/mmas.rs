@@ -7,7 +7,7 @@ use super::{AcoParameters, Ant};
 use crate::instance_data::InstanceData;
 use crate::util::{self, FloatMatrix};
 
-pub struct MMASColony<'a> {
+pub struct MmasColony<'a> {
     iteration: usize,
     parallel: bool,
     data: &'a InstanceData,
@@ -26,7 +26,7 @@ pub struct MMASColony<'a> {
     restart_iter: usize,
 }
 
-impl<'a> Colony<'a> for MMASColony<'a> {
+impl<'a> Colony<'a> for MmasColony<'a> {
     fn new_iteration(&mut self) {
         self.iteration += 1;
         if self.iteration - self.restart_iter >= 150 {
@@ -92,12 +92,12 @@ impl<'a> Colony<'a> for MMASColony<'a> {
     }
 }
 
-impl<'a> MMASColony<'a> {
+impl<'a> MmasColony<'a> {
     pub fn initialize_colony(
         data: &'a InstanceData,
         parameters: &'a AcoParameters,
         parallel: bool,
-    ) -> MMASColony<'a> {
+    ) -> MmasColony<'a> {
         let nn_tour_length = ant::nearest_neighbour_tour(data, 0);
         let (trail_min, trail_max) =
             calculate_bounding_values(nn_tour_length, data.size, parameters.evaporation_rate);

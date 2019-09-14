@@ -9,7 +9,7 @@ use super::colony::{compute_combined_info, Colony};
 use super::AcoParameters;
 use super::Ant;
 
-pub struct ACSColony<'a> {
+pub struct AcsColony<'a> {
     iteration: usize,
     data: &'a InstanceData,
     pheromones: FloatMatrix,
@@ -22,7 +22,7 @@ pub struct ACSColony<'a> {
     parameters: &'a AcoParameters,
 }
 
-impl<'a> Colony<'a> for ACSColony<'a> {
+impl<'a> Colony<'a> for AcsColony<'a> {
     fn new_iteration(&mut self) {
         self.iteration += 1
     }
@@ -74,11 +74,11 @@ impl<'a> Colony<'a> for ACSColony<'a> {
     }
 }
 
-impl<'a> ACSColony<'a> {
+impl<'a> AcsColony<'a> {
     pub fn initialize_colony(
         data: &'a InstanceData,
         parameters: &'a AcoParameters,
-    ) -> ACSColony<'a> {
+    ) -> AcsColony<'a> {
         let nn_tour_length = ant::nearest_neighbour_tour(data, 0);
         let initial_trail = calculate_initial_values(nn_tour_length, data.size);
         let pheromones = util::generate_pheromone_matrix(data.size, initial_trail);
