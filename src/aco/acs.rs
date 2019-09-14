@@ -11,7 +11,6 @@ use super::Ant;
 
 pub struct ACSColony<'a> {
     iteration: usize,
-    parallel: bool,
     data: &'a InstanceData,
     pheromones: FloatMatrix,
     /// Heuristic information based on the distance, calculated on initialization
@@ -36,30 +35,16 @@ impl<'a> Colony<'a> for ACSColony<'a> {
         let n_ants = self.parameters.num_ants;
         let data_size = self.data.size;
         let mut ants_vec = ant::create_ants(n_ants, data_size);
-        if self.parallel {
-            for _ in 0..data_size - 1 {
-                ants_vec = ants_vec
-                    .into_par_iter()
-                    .map(|ant| {
-                        ant::acs_ant_step(ant, self.data, &self.combined_info, self.parameters)
-                    })
-                    .collect();
-                for ant in ants_vec.iter() {
-                    self.local_pheromone_update(ant);
-                }
-            }
-        } else {
-            for _ in 0..data_size - 1 {
-                ants_vec = ants_vec
-                    .into_iter()
-                    .map(|ant| {
-                        let ant =
-                            ant::acs_ant_step(ant, self.data, &self.combined_info, self.parameters);
-                        self.local_pheromone_update(&ant);
-                        ant
-                    })
-                    .collect();
-            }
+        for _ in 0..data_size - 1 {
+            ants_vec = ants_vec
+                .into_iter()
+                .map(|ant| {
+                    let ant =
+                        ant::acs_ant_step(ant, self.data, &self.combined_info, self.parameters);
+                    self.local_pheromone_update(&ant);
+                    ant
+                })
+                .collect();
         }
         for ant in ants_vec.iter_mut() {
             ant.length += self.data.distances[(ant.get_last(), ant.get_first())];
@@ -93,7 +78,6 @@ impl<'a> ACSColony<'a> {
     pub fn initialize_colony(
         data: &'a InstanceData,
         parameters: &'a AcoParameters,
-        parallel: bool,
     ) -> ACSColony<'a> {
         let nn_tour_length = ant::nearest_neighbour_tour(data, 0);
         let initial_trail = calculate_initial_values(nn_tour_length, data.size);
@@ -103,7 +87,6 @@ impl<'a> ACSColony<'a> {
 
         Self {
             iteration: 0,
-            parallel,
             data,
             pheromones,
             heuristic_info,

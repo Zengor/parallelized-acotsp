@@ -35,14 +35,10 @@ pub fn run_aco(data: &InstanceData, parameters: &AcoParameters) -> ResultLog {
             run_colony(colony, parameters.max_iterations, parameters.time_limit)
         }
         Algorithm::ACS => {
-            let colony = acs::ACSColony::initialize_colony(data, parameters, false);
+            let colony = acs::ACSColony::initialize_colony(data, parameters);
             run_colony(colony, parameters.max_iterations, parameters.time_limit)
         }
-        Algorithm::ACSParMasterUpdate => {
-            let colony = acs::ACSColony::initialize_colony(data, parameters, true);
-            run_colony(colony, parameters.max_iterations, parameters.time_limit)
-        }
-        Algorithm::ACSParSync => {
+        Algorithm::ACSPar => {
             let colony = acspar::ACSPar::initialize_colony(data, parameters);
             run_colony(colony, parameters.max_iterations, parameters.time_limit)
         }
@@ -80,7 +76,7 @@ fn find_best<'a>(results: &'a [Ant]) -> &'a Ant {
 
 /// Function to calculate the total weight of a given connection, combining its current
 /// pheromones and the inherit heuristic information, modified by algorithm parameters
-/// alpha and beta. 
+/// alpha and beta.
 pub fn total_value(pheromone: f64, heuristic: f64, alpha: f64, beta: f64) -> f64 {
     pheromone.powf(alpha) * heuristic.powf(beta)
 }

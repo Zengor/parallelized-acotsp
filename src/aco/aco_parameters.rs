@@ -5,8 +5,7 @@ pub enum Algorithm {
     MMAS,
     MMASPar,
     ACS,
-    ACSParMasterUpdate,
-    ACSParSync,
+    ACSPar,
 }
 
 impl Default for Algorithm {

@@ -5,8 +5,6 @@ use super::AcoParameters;
 use crate::instance_data::InstanceData;
 use crate::util::{self, FloatMatrix, IntegerMatrix};
 
-
-
 pub trait Colony<'a> {
     fn new_iteration(&mut self);
     fn iteration(&self) -> usize;
