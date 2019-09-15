@@ -1,9 +1,6 @@
-use itertools::Itertools;
-
 use super::ant::Ant;
 use super::AcoParameters;
-use crate::instance_data::InstanceData;
-use crate::util::{self, FloatMatrix, IntegerMatrix};
+use crate::util::{FloatMatrix, IntegerMatrix};
 
 pub trait Colony<'a> {
     fn new_iteration(&mut self);

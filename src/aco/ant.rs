@@ -181,10 +181,12 @@ pub fn acs_ant_step_sync(
     combined_info: &FloatMatrixSync,
     parameters: &AcoParameters,
 ) -> Ant {
-    // this code is very verbose and repeats code done by other functions,
-    // which could be perhaps avoided with some refactoring and using some new traits.
-    // it includes a complete repeat of the choose_best_next and choose_probabilistically function
-    // except that they're now accounting for the fact that combined_info holds RwLocks which must be handled.
+    // this code is very verbose and repeats code done by other
+    // functions, which could be perhaps avoided with some refactoring
+    // and using some new traits.  it includes a complete repeat of
+    // the choose_best_next and choose_probabilistically function
+    // except that they're now accounting for the fact that
+    // combined_info holds RwLocks which must be handled.
 
     let mut rng = thread_rng();
     let next_city = if rng.gen_bool(parameters.q_0) {

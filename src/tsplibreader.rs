@@ -9,8 +9,13 @@ pub fn read_instance_file(f_name: &str) -> FileData {
     let mut lines = BufReader::new(&f).lines();
     let mut metadata = Metadata::default();
     let mut size: usize = 0;
-    let mut data_layout = NODE_COORD_SECTION;
-
+    // this enum only has a single variant, so it's basically a unit
+    // struct.  Since no other variants exist we could remove the part
+    // of the code that checks for it, but I'm leaving it here so that
+    // it's easier to change it if/when more variants are added. Just have to
+    // change this to `let mut data_layout = <initial value (might be optional)>`
+    // and add the other variants to the match statement
+    let data_layout;
     loop {
         let line = lines.next().unwrap().unwrap();
         let split: Vec<_> = line.split(": ").collect();

@@ -1,5 +1,4 @@
 use itertools::Itertools;
-use rayon::prelude::*;
 
 use crate::instance_data::InstanceData;
 use crate::util::{self, FloatMatrix};
