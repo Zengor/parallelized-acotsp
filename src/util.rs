@@ -1,3 +1,4 @@
+use indexmap::IndexSet;
 use parking_lot::RwLock;
 use std::ops::{Index, IndexMut};
 use std::sync::Arc;
@@ -63,6 +64,56 @@ impl<T> IndexMut<(usize, usize)> for Matrix<T> {
     }
 }
 
+trait ColonyInfoMatrix {
+    fn unvisited_weights(&self, row: usize, excludes: &IndexSet<usize>) -> (Vec<usize>, Vec<f64>);
+    fn filtered_row_max(&self, row: usize, excludes: &IndexSet<usize>) -> usize;
+}
+
+impl ColonyInfoMatrix for Matrix<f64> {
+    fn unvisited_weights(&self, row: usize, excludes: &IndexSet<usize>) -> (Vec<usize>, Vec<f64>) {
+        self.row(row)
+            .iter()
+            .enumerate()
+            .filter(|(i, _)| !excludes.contains(i))
+            .unzip()
+    }
+    fn filtered_row_max(&self, row: usize, excludes: &IndexSet<usize>) -> usize {
+        let (i, _) = self
+            .row(row)
+            .iter()
+            .enumerate()
+            .filter(|(i, _)| !excludes.contains(i))
+            .max_by(|(_, a), (_, b)| a.partial_cmp(b).expect("failed comparison"))
+            .expect("failed max_by");
+        i
+    }
+}
+
+impl ColonyInfoMatrix for Arc<Matrix<RwLock<f64>>> {
+    fn unvisited_weights(&self, row: usize, excludes: &IndexSet<usize>) -> (Vec<usize>, Vec<f64>) {
+        self.row(row)
+            .iter()
+            .enumerate()
+            .filter(|(i, _)| !excludes.contains(i))
+            .map(|(c, w)| (c, *w.read()))
+            .unzip()
+    }
+    fn filtered_row_max(&self, row: usize, excludes: &IndexSet<usize>) -> usize {
+        let (i, _) = self
+            .row(row)
+            .iter()
+            .enumerate()
+            .filter(|(i, _)| !excludes.contains(i))
+            .max_by(|(_, a), (_, b)| {
+                (a.read())
+                    .partial_cmp(&b.read())
+                    .expect("failed comparison")
+            })
+            .expect("failed max_by");
+        i
+    }
+}
+
 /// Creates a size*size Matrix meant to store pheromones with a given
 /// initial value. The main diagonal will be set to f64::MAX so that
 /// ants will not go repeatedly towards the same city without additional
@@ -79,11 +130,7 @@ pub fn generate_pheromone_matrix(size: usize, value: f64) -> FloatMatrix {
 /// matrix in an `Arc`. Used with the parallelized version of ACS.
 pub fn convert_to_sync(matrix: FloatMatrix) -> FloatMatrixSync {
     let width = matrix.width;
-    let sync_vec = matrix
-        .data
-        .into_iter()
-        .map(|x| RwLock::new(x))
-        .collect();
+    let sync_vec = matrix.data.into_iter().map(|x| RwLock::new(x)).collect();
 
     Arc::new(Matrix {
         data: sync_vec,
