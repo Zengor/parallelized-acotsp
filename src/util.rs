@@ -64,7 +64,7 @@ impl<T> IndexMut<(usize, usize)> for Matrix<T> {
     }
 }
 
-trait ColonyInfoMatrix {
+pub trait ColonyInfoMatrix {
     fn unvisited_weights(&self, row: usize, excludes: &IndexSet<usize>) -> (Vec<usize>, Vec<f64>);
     fn filtered_row_max(&self, row: usize, excludes: &IndexSet<usize>) -> usize;
 }

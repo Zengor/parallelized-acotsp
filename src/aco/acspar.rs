@@ -74,7 +74,7 @@ impl<'a> Colony<'a> for AcsPar<'a> {
                         )
                     },
                     |(pheromones, combined_info, mutex), ant| {
-                        let ant = ant::acs_ant_step_sync(
+                        let ant = ant::acs_ant_step(
                             ant,
                             self.data,
                             &self.combined_info,

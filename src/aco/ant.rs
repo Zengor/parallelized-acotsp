@@ -1,6 +1,6 @@
 use super::aco_parameters::AcoParameters;
 use crate::instance_data::InstanceData;
-use crate::util::{FloatMatrix, FloatMatrixSync};
+use crate::util::{ColonyInfoMatrix};
 use indexmap::IndexSet;
 use rand::{thread_rng, Rng};
 
@@ -88,35 +88,23 @@ pub fn nearest_neighbour_tour(data: &InstanceData, starting_city: usize) -> u32 
 
 /// Chooses an unvisited city to go to with the highest total combined heuristic+pheromone
 /// information. Returns the index of that city.
-fn choose_best_next(
+fn choose_best_next<T: ColonyInfoMatrix>(
     curr_city: usize,
     visited: &IndexSet<usize>,
-    combined_info: &FloatMatrix,
+    combined_info: &T,
 ) -> usize {
-    let (next_city, _) = combined_info
-        .row(curr_city)
-        .iter()
-        .enumerate()
-        .filter(|(city, _)| !visited.contains(city))
-        .max_by(|(_, a), (_, b)| a.partial_cmp(b).unwrap())
-        .unwrap();
-    next_city
+    combined_info.filtered_row_max(curr_city, visited)
 }
 
 /// Chooses an unvisited city to go to using the proportional rule defined in the literature.
 /// Returns the index of that city.
-fn choose_probabilistically(
+fn choose_probabilistically<T: ColonyInfoMatrix>(
     curr_city: usize,
     visited: &IndexSet<usize>,
-    combined_info: &FloatMatrix,
+    combined_info: &T,
     rng: &mut impl Rng,
 ) -> usize {
-    let (unvisited, weights): (Vec<usize>, Vec<f64>) = combined_info
-        .row(curr_city)
-        .iter()
-        .enumerate()
-        .filter(|(city, _)| !visited.contains(city))
-        .unzip();
+    let (unvisited, weights) = combined_info.unvisited_weights(curr_city, visited);
     let mut random_v: f64 = rng.gen::<f64>() * weights.iter().sum::<f64>();
     for (city, weight) in unvisited.iter().zip(weights) {
         random_v -= weight;
@@ -127,7 +115,7 @@ fn choose_probabilistically(
     unreachable!()
 }
 
-pub fn mmas_ant(data: &InstanceData, combined_info: &FloatMatrix) -> Ant {
+pub fn mmas_ant<T: ColonyInfoMatrix>(data: &InstanceData, combined_info: &T) -> Ant {
     let mut rng = thread_rng();
     let starting_city = rng.gen_range(0, data.size);
     let mut ant = Ant::new_on_city(data.size, starting_city);
@@ -154,11 +142,12 @@ pub fn create_ants(num_ants: usize, data_size: usize) -> Vec<Ant> {
     v
 }
 
-/// A single step for an `Ant` in the ACS algorithm. Returns an ant that has moved a step further
-pub fn acs_ant_step(
+/// A single step for an `Ant` in the ACS algorithm.
+/// Returns an ant that has moved a step further
+pub fn acs_ant_step<T: ColonyInfoMatrix>(
     mut ant: Ant,
     data: &InstanceData,
-    combined_info: &FloatMatrix,
+    combined_info: &T,
     parameters: &AcoParameters,
 ) -> Ant {
     // note: acs assumes an aplha value of 1 in all cases
@@ -169,61 +158,6 @@ pub fn acs_ant_step(
     } else {
         //get probabilistic
         choose_probabilistically(ant.curr_city, &ant.tour, combined_info, &mut rng)
-    };
-    ant.insert(next_city, data.distances[(ant.curr_city, next_city)]);
-    ant
-}
-
-/// A single step for an `Ant` in the ACS algorithm using sync primitives. Returns an ant that has moved a step further.
-pub fn acs_ant_step_sync(
-    mut ant: Ant,
-    data: &InstanceData,
-    combined_info: &FloatMatrixSync,
-    parameters: &AcoParameters,
-) -> Ant {
-    // this code is very verbose and repeats code done by other
-    // functions, which could be perhaps avoided with some refactoring
-    // and using some new traits.  it includes a complete repeat of
-    // the choose_best_next and choose_probabilistically function
-    // except that they're now accounting for the fact that
-    // combined_info holds RwLocks which must be handled.
-
-    let mut rng = thread_rng();
-    let next_city = if rng.gen_bool(parameters.q_0) {
-        // get max heuristic info
-        //choose_best_next(ant.curr_city, &ant.tour, combined_info)
-        let (next_city, _) = combined_info
-            .row(ant.curr_city)
-            .iter()
-            .enumerate()
-            .filter(|(city, _)| !ant.tour.contains(city))
-            .max_by(|(_, a), (_, b)| {
-                (*a.read())
-                    .partial_cmp(&*b.read())
-                    .expect("failed comparison")
-            })
-            .expect("failed max_by");
-        next_city
-    } else {
-        //get probabilistic
-        //choose_probabilistically(ant.curr_city, &ant.tour, combined_info, &mut rng)
-        let mut next_city = 0;
-        let (unvisited, weights): (Vec<usize>, Vec<f64>) = combined_info
-            .row(ant.curr_city)
-            .iter()
-            .enumerate()
-            .filter(|(city, _)| !ant.tour.contains(city))
-            .map(|(c, w)| (c, *w.read()))
-            .unzip();
-        let mut random_v: f64 = rng.gen::<f64>() * weights.iter().sum::<f64>();
-        for (city, weight) in unvisited.iter().zip(weights) {
-            random_v -= weight;
-            if random_v < 0.0 {
-                next_city = *city;
-                break;
-            }
-        }
-        next_city
     };
     ant.insert(next_city, data.distances[(ant.curr_city, next_city)]);
     ant
