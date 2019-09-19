@@ -99,7 +99,7 @@ impl ColonyInfoMatrix for FloatMatrix {
         self.row(row)
             .iter()
             .enumerate()
-            .filter(|(i, _)| !excludes.contains(i))
+            .filter(|(i, _)| !visited.contains(i))
             .unzip()
     }
     fn filtered_row_max(&self, row: usize, excludes: &IndexSet<usize>) -> usize {
@@ -119,7 +119,7 @@ impl ColonyInfoMatrix for FloatMatrixSync {
         self.row(row)
             .iter()
             .enumerate()
-            .filter(|(i, _)| !excludes.contains(i))
+            .filter(|(i, _)| !visited.contains(i))
             .map(|(c, w)| (c, *w.read()))
             .unzip()
     }

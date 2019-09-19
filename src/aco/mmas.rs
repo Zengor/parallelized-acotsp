@@ -167,7 +167,7 @@ fn evaporate(pheromones: &mut FloatMatrix, evap_rate: f64) {
     }
 }
 
-pub fn global_update_pheromones(pheromones: &mut FloatMatrix, ant: &Ant) {
+fn global_update_pheromones(pheromones: &mut FloatMatrix, ant: &Ant) {
     let d_tau = 1.0 / (ant.length as f64);
     for (&i, &j) in ant.tour.iter().tuple_windows() {
         pheromones[(i, j)] = pheromones[(i, j)] + d_tau;
