@@ -120,7 +120,7 @@ impl<'a> MmasColony<'a> {
             restart_iter: 1,
         }
     }
-    
+
     fn check_trail_limits(&mut self) {
         for i in 0..self.pheromones.width() {
             for j in 0..i {

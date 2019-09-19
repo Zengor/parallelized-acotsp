@@ -74,12 +74,8 @@ impl<'a> Colony<'a> for AcsPar<'a> {
                         )
                     },
                     |(pheromones, combined_info, mutex), ant| {
-                        let ant = ant::acs_ant_step(
-                            ant,
-                            self.data,
-                            &self.combined_info,
-                            self.parameters,
-                        );
+                        let ant =
+                            ant::acs_ant_step(ant, self.data, &self.combined_info, self.parameters);
                         local_pheromone_update(
                             mutex,
                             pheromones,

@@ -1,6 +1,6 @@
 use super::aco_parameters::AcoParameters;
 use crate::instance_data::InstanceData;
-use crate::util::{ColonyInfoMatrix};
+use crate::util::ColonyInfoMatrix;
 use indexmap::IndexSet;
 use rand::{thread_rng, Rng};
 

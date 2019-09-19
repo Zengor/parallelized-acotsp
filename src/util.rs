@@ -64,13 +64,38 @@ impl<T> IndexMut<(usize, usize)> for Matrix<T> {
     }
 }
 
+/// Helper trait to unify behavior needed for the ants across
+/// different types of matrices.
+///
+/// In particular, this allows
+/// FloatMatrix and FloatMatrixSync to have a shared interface that is
+/// able to handle the RwLocks in FloatMatrixSync, so the solution
+/// creation code can be applied to both.
+///
+/// The methods defined in this trait are inherently very specific to
+/// what is needed for  ACO algorithms.
 pub trait ColonyInfoMatrix {
-    fn unvisited_weights(&self, row: usize, excludes: &IndexSet<usize>) -> (Vec<usize>, Vec<f64>);
+    /// Returns which members of the given row are not part of a given
+    /// set, and their respective values.
+    ///
+    /// This method is to be used by `choose_probabilistically`, where
+    /// the values will be used as weights for deciding which city to
+    /// visit next.
+    ///
+    /// It would be a nice generalization to make this return an iterator
+    /// (or even just the filtered row), but it creates some complications
+    /// with the borrow checker as `visited` is borrowed and needs to be accessed
+    /// within the iterator. With this signature, the method has to consume the iterator.
+    fn unvisited_weights(&self, row: usize, visited: &IndexSet<usize>) -> (Vec<usize>, Vec<f64>);
+    /// Returns the index of the largest value of a given row in the
+    /// matrix, with a set of indices to be ignored.
+    ///
+    /// This is used in `choose_best_next` to find the highest-valued city.
     fn filtered_row_max(&self, row: usize, excludes: &IndexSet<usize>) -> usize;
 }
 
-impl ColonyInfoMatrix for Matrix<f64> {
-    fn unvisited_weights(&self, row: usize, excludes: &IndexSet<usize>) -> (Vec<usize>, Vec<f64>) {
+impl ColonyInfoMatrix for FloatMatrix {
+    fn unvisited_weights(&self, row: usize, visited: &IndexSet<usize>) -> (Vec<usize>, Vec<f64>) {
         self.row(row)
             .iter()
             .enumerate()
@@ -89,8 +114,8 @@ impl ColonyInfoMatrix for Matrix<f64> {
     }
 }
 
-impl ColonyInfoMatrix for Arc<Matrix<RwLock<f64>>> {
-    fn unvisited_weights(&self, row: usize, excludes: &IndexSet<usize>) -> (Vec<usize>, Vec<f64>) {
+impl ColonyInfoMatrix for FloatMatrixSync {
+    fn unvisited_weights(&self, row: usize, visited: &IndexSet<usize>) -> (Vec<usize>, Vec<f64>) {
         self.row(row)
             .iter()
             .enumerate()
